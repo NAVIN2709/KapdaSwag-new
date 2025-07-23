@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
 import Icon from "../../../components/AppIcon";
 import Image from "../../../components/AppImage";
 import Button from "../../../components/ui/Button";
@@ -18,31 +18,42 @@ const ProductCard = ({
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [lastTap, setLastTap] = useState(0);
   const [showComments, setShowComments] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState(null); // "left" or "right"
 
   const cardRef = useRef(null);
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-30, 30]);
-  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+  const opacity = useTransform(x, [-300, -100, 0, 100, 300], [0, 1, 1, 1, 0]);
+
+  // Reactively show swipe icons
+  useEffect(() => {
+    const unsubscribe = x.on("change", (latestX) => {
+      if (latestX > 50) setSwipeDirection("right");
+      else if (latestX < -50) setSwipeDirection("left");
+      else setSwipeDirection(null);
+    });
+
+    return () => unsubscribe();
+  }, [x]);
 
   const handleDragEnd = (event, info) => {
-    const threshold = 100;
+    const offset = info.offset.x;
     const velocity = info.velocity.x;
+    const threshold = 100;
 
-    if (Math.abs(info.offset.x) > threshold || Math.abs(velocity) > 500) {
-      if (info.offset.x > 0) {
-        setIsLiked(true);
-        onSwipeRight(product);
-      } else {
-        onSwipeLeft(product);
-      }
+    if (offset > threshold || velocity > 500) {
+      setIsLiked(true);
+      onSwipeRight(product);
+    } else if (offset < -threshold || velocity < -500) {
+      onSwipeLeft(product);
     }
   };
 
   const handleTap = () => {
     const now = Date.now();
-    const timeDiff = now - lastTap;
+    const delta = now - lastTap;
 
-    if (timeDiff < 300 && timeDiff > 0) {
+    if (delta < 300) {
       setIsLiked(true);
       setShowHeartAnimation(true);
       onDoubleTap(product);
@@ -52,25 +63,21 @@ const ProductCard = ({
   };
 
   const handleSave = () => {
-    setIsSaved(!isSaved);
+    setIsSaved((prev) => !prev);
   };
 
   const handleShopNow = () => {
-    console.log("hi")
+    console.log("Shop now clicked");
   };
 
   return (
     <motion.div
       ref={cardRef}
-      className="absolute inset-0 w-full h-[90%] cursor-grab active:cursor-grabbing my-auto"
-      style={{
-        x,
-        rotate,
-        opacity,
-        zIndex,
-      }}
+      className="absolute inset-0 w-full h-[90%] my-auto cursor-grab active:cursor-grabbing"
+      style={{ x, rotate, opacity, zIndex }}
       drag={isActive ? "x" : false}
-      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.2}
+      dragMomentum={true}
       onDragEnd={handleDragEnd}
       onTap={handleTap}
       whileDrag={{ scale: 1.05 }}
@@ -79,14 +86,13 @@ const ProductCard = ({
       exit={{ scale: 0.95, opacity: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      {/* Product Image */}
+      {/* Card Content */}
       <div className="relative w-full h-full bg-muted/20 overflow-hidden rounded-2xl">
         <Image
           src={product.image}
           alt={product.name}
           className="w-full h-full object-cover"
         />
-
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
         {/* Brand Logo */}
@@ -130,7 +136,6 @@ const ProductCard = ({
             <Icon name="MessageCircle" size={20} />
           </Button>
 
-          {/* Shop Now Button */}
           <Button
             onClick={handleShopNow}
             className="w-30 bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold shadow backdrop-blur-xs"
@@ -139,7 +144,7 @@ const ProductCard = ({
           </Button>
         </div>
 
-        {/* Product Info */}
+        {/* Info */}
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
           <div className="flex items-center space-x-4 mb-3">
             <div className="flex items-center space-x-1">
@@ -166,7 +171,6 @@ const ProductCard = ({
                   </span>
                 )}
               </div>
-
               {product.tasteMatch && (
                 <div className="bg-primary/90 backdrop-blur-xs rounded-full px-3 py-1">
                   <span className="text-xs font-bold text-white">
@@ -192,25 +196,29 @@ const ProductCard = ({
         </div>
 
         {/* Swipe Indicators */}
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: x.get() > 50 ? 1 : 0 }}
-        >
-          <div className="bg-success/90 backdrop-blur-xs rounded-full p-4">
-            <Icon name="Heart" size={32} className="text-white" />
-          </div>
-        </motion.div>
+        {swipeDirection === "right" && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <div className="bg-red-700 backdrop-blur-xs rounded-full p-4">
+              <Icon name="Heart" size={32} className="text-white" />
+            </div>
+          </motion.div>
+        )}
 
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: x.get() < -50 ? 1 : 0 }}
-        >
-          <div className="bg-error/90 backdrop-blur-xs rounded-full p-4">
-            <Icon name="X" size={32} className="text-white" />
-          </div>
-        </motion.div>
+        {swipeDirection === "left" && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <div className="bg-red-700 backdrop-blur-xs rounded-full p-4">
+              <Icon name="X" size={32} className="text-white" />
+            </div>
+          </motion.div>
+        )}
 
         {showHeartAnimation && (
           <motion.div

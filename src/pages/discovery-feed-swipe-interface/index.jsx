@@ -287,17 +287,14 @@ const DiscoveryFeedSwipeInterface = () => {
   };
 
   const handleSwipeLeft = useCallback((product) => {
-    setSwipeStats((prev) => ({ ...prev, skips: prev.skips + 1 }));
     setCurrentIndex((prev) => prev + 1);
   }, []);
 
   const handleSwipeRight = useCallback((product) => {
-    setSwipeStats((prev) => ({ ...prev, likes: prev.likes + 1 }));
     setCurrentIndex((prev) => prev + 1);
   }, []);
 
   const handleDoubleTap = useCallback((product) => {
-    setSwipeStats((prev) => ({ ...prev, likes: prev.likes + 1 }));
     setCurrentIndex((prev) => prev + 1);
   }, []);
 
