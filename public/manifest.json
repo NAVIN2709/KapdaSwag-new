@@ -1,0 +1,24 @@
+{
+  "short_name": "KapdaSwag",
+  "name": "KapdaSwag - Fashion Social Network",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "description": "KapdaSwag is a Gen-Z fashion-social app for design challenges, collabs, models, and content creators.",
+  "scope": "/",
+  "lang": "en"
+}
