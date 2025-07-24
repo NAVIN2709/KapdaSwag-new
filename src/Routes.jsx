@@ -10,6 +10,8 @@ import FriendDiscovery from "pages/friend-discovery";
 import UserProfile from "pages/user-profile";
 import ProductDetail from "pages/product-detail";
 import NotFound from "pages/NotFound";
+import Chats from 'pages/chats'
+import ChatScreen from "pages/chats/[id]";
 
 const Routes = () => {
   return (
@@ -19,12 +21,13 @@ const Routes = () => {
       <RouterRoutes>
         {/* Define your routes here */}
         <Route path="/" element={<DiscoveryFeedSwipeInterface />} />
-        <Route path="/discovery-feed-swipe-interface" element={<DiscoveryFeedSwipeInterface />} />
         <Route path="/community-hub" element={<CommunityHub />} />
         <Route path="/category-browse" element={<CategoryBrowse />} />
         <Route path="/friend-discovery" element={<FriendDiscovery />} />
         <Route path="/user-profile" element={<UserProfile />} />
         <Route path="/product-detail" element={<ProductDetail />} />
+        <Route path="/chats" element={<Chats />} />
+        <Route path="/chats/:id" element={<ChatScreen />} />
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
       </ErrorBoundary>

@@ -5,9 +5,11 @@ import Icon from '../AppIcon';
 const BottomNavigation = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  
   const [notifications] = useState({
     community: 3,
-    connect: 1
+    connect: 1,
+    chat: 2, // unread chat messages
   });
 
   const navigationItems = [
@@ -15,37 +17,44 @@ const BottomNavigation = () => {
       id: 'discover',
       label: 'Discover',
       icon: 'Zap',
-      path: '/discovery-feed-swipe-interface',
-      badgeCount: 0
+      path: '/',
+      badgeCount: 0,
     },
     {
       id: 'browse',
       label: 'Browse',
       icon: 'Grid3X3',
       path: '/category-browse',
-      badgeCount: 0
+      badgeCount: 0,
     },
     {
       id: 'community',
       label: 'Community',
       icon: 'Users',
       path: '/community-hub',
-      badgeCount: notifications.community
+      badgeCount: notifications.community,
     },
     {
       id: 'connect',
       label: 'Connect',
       icon: 'Heart',
       path: '/friend-discovery',
-      badgeCount: notifications.connect
+      badgeCount: notifications.connect,
+    },
+    {
+      id: 'chat',
+      label: 'Chat',
+      icon: 'MessageCircle',
+      path: '/chats',
+      badgeCount: notifications.chat,
     },
     {
       id: 'profile',
       label: 'Profile',
       icon: 'User',
       path: '/user-profile',
-      badgeCount: 0
-    }
+      badgeCount: 0,
+    },
   ];
 
   const handleTabPress = (item) => {
@@ -61,7 +70,7 @@ const BottomNavigation = () => {
       <div className="flex items-center justify-around px-4 py-2">
         {navigationItems.map((item) => {
           const active = isActive(item.path);
-          
+
           return (
             <button
               key={item.id}
@@ -69,9 +78,7 @@ const BottomNavigation = () => {
               className={`
                 relative flex flex-col items-center justify-center min-w-0 flex-1 py-2 px-1
                 animation-spring touch-manipulation
-                ${active 
-                  ? 'text-primary' :'text-muted-foreground hover:text-foreground'
-                }
+                ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}
               `}
               style={{ minHeight: '48px' }}
               aria-label={`${item.label} tab`}
@@ -86,7 +93,7 @@ const BottomNavigation = () => {
                   strokeWidth={active ? 2.5 : 2}
                   className={active ? 'drop-shadow-sm' : ''}
                 />
-                
+
                 {/* Badge */}
                 {item.badgeCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-warning text-warning-foreground text-xs font-medium rounded-full flex items-center justify-center px-1 animate-bounce-subtle">
@@ -94,15 +101,17 @@ const BottomNavigation = () => {
                   </span>
                 )}
               </div>
-              
+
               {/* Label */}
-              <span className={`
-                text-xs font-medium leading-none truncate max-w-full
-                ${active ? 'text-primary' : 'text-muted-foreground'}
-              `}>
+              <span
+                className={`
+                  text-xs font-medium leading-none truncate max-w-full
+                  ${active ? 'text-primary' : 'text-muted-foreground'}
+                `}
+              >
                 {item.label}
               </span>
-              
+
               {/* Active Indicator */}
               {active && (
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div>

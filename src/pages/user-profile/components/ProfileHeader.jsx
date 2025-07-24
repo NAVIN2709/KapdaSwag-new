@@ -4,11 +4,11 @@ import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 
 const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage }) => {
-  const [isFollowing, setIsFollowing] = useState(user.isFollowing || false);
+  const [isFriends, setIsFollowing] = useState(user.isFriends || false);
 
   const handleFollowClick = () => {
-    setIsFollowing(!isFollowing);
-    onFollow(!isFollowing);
+    setIsFollowing(!isFriends);
+    onFollow(!isFriends);
   };
 
   return (
@@ -23,35 +23,13 @@ const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage 
               className="w-full h-full object-cover"
             />
           </div>
-          {user.isOnline && (
-            <div className="absolute bottom-1 right-1 w-4 h-4 bg-success border-2 border-background rounded-full"></div>
-          )}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2 mb-1">
             <h1 className="text-xl font-bold text-foreground truncate">{user.name}</h1>
-            {user.isVerified && (
-              <Icon name="BadgeCheck" size={20} className="text-primary flex-shrink-0" />
-            )}
           </div>
           <p className="text-muted-foreground mb-2">@{user.username}</p>
-          
-          {/* Stats */}
-          <div className="flex items-center space-x-4 text-sm">
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold text-foreground font-mono">{user.followersCount}</span>
-              <span className="text-muted-foreground">followers</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold text-foreground font-mono">{user.followingCount}</span>
-              <span className="text-muted-foreground">following</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold text-foreground font-mono">{user.postsCount}</span>
-              <span className="text-muted-foreground">posts</span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -59,7 +37,7 @@ const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage 
       <div className="flex space-x-2 mb-4">
         {isOwnProfile ? (
           <Button
-            variant="outline"
+            variant="default"
             className="flex-1"
             iconName="Edit"
             iconPosition="left"
@@ -67,19 +45,19 @@ const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage 
           >
             Edit Profile
           </Button>
-        ) : (
+        ) : isFriends ? (
           <>
             <Button
-              variant={isFollowing ? "outline" : "default"}
+              variant="outline"
               className="flex-1"
-              iconName={isFollowing ? "UserMinus" : "UserPlus"}
+              iconName="UserMinus"
               iconPosition="left"
               onClick={handleFollowClick}
             >
-              {isFollowing ? 'Following' : 'Follow'}
+              Remove
             </Button>
             <Button
-              variant="outline"
+              variant="default"
               iconName="MessageCircle"
               iconPosition="left"
               onClick={onMessage}
@@ -87,6 +65,16 @@ const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage 
               Message
             </Button>
           </>
+        ) : (
+          <Button
+            variant="default"
+            className="flex-1"
+            iconName="UserPlus"
+            iconPosition="left"
+            onClick={handleFollowClick}
+          >
+            Request
+          </Button>
         )}
       </div>
 
