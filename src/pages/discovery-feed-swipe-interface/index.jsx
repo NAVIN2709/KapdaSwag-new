@@ -287,11 +287,11 @@ const DiscoveryFeedSwipeInterface = () => {
   };
 
   const handleSwipeLeft = useCallback((product) => {
-    setCurrentIndex((prev) => prev + 1);
+    setProducts((prev) => prev.filter((p) => p.id !== product.id));
   }, []);
 
   const handleSwipeRight = useCallback((product) => {
-    setCurrentIndex((prev) => prev + 1);
+    setProducts((prev) => prev.filter((p) => p.id !== product.id));
   }, []);
 
   const handleDoubleTap = useCallback((product) => {

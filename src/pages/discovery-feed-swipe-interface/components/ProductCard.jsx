@@ -1,5 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion, useMotionValue, useTransform, useAnimation } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  useAnimation,
+} from "framer-motion";
 import Icon from "../../../components/AppIcon";
 import Image from "../../../components/AppImage";
 import Button from "../../../components/ui/Button";
@@ -22,6 +27,7 @@ const ProductCard = ({
 
   const cardRef = useRef(null);
   const x = useMotionValue(0);
+  const controls = useAnimation();
   const rotate = useTransform(x, [-200, 200], [-30, 30]);
   const opacity = useTransform(x, [-300, -100, 0, 100, 300], [0, 1, 1, 1, 0]);
 
@@ -43,9 +49,16 @@ const ProductCard = ({
 
     if (offset > threshold || velocity > 500) {
       setIsLiked(true);
-      onSwipeRight(product);
+      controls.start({ x: 1000, opacity: 0 }).then(() => {
+        onSwipeRight(product);
+      });
     } else if (offset < -threshold || velocity < -500) {
-      onSwipeLeft(product);
+      controls.start({ x: -1000, opacity: 0 }).then(() => {
+        onSwipeLeft(product);
+      });
+    } else {
+      // Snap back to original position
+      controls.start({ x: 0, rotate: 0, scale: 1 });
     }
   };
 
@@ -69,6 +82,9 @@ const ProductCard = ({
   const handleShopNow = () => {
     console.log("Shop now clicked");
   };
+  useEffect(() => {
+    controls.start({ x: 0, scale: 1 });
+  }, []);
 
   return (
     <motion.div
@@ -81,9 +97,9 @@ const ProductCard = ({
       onDragEnd={handleDragEnd}
       onTap={handleTap}
       whileDrag={{ scale: 1.05 }}
-      initial={{ scale: 0.95, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0.95, opacity: 0 }}
+      initial={{ scale: 0.95 }}
+      animate={controls}
+      exit={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       {/* Card Content */}

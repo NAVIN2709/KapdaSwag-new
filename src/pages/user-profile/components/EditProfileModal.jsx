@@ -9,11 +9,9 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     name: user?.name || '',
     username: user?.username || '',
     bio: user?.bio || '',
-    website: user?.website || '',
     location: user?.location || '',
     styleTags: user?.styleTags || [],
     avatar: user?.avatar || '',
-    isPrivate: user?.isPrivate || false
   });
   const [newTag, setNewTag] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -65,8 +63,6 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
 
   const handleSave = async () => {
     setIsLoading(true);
-    
-    // Simulate API call
     setTimeout(() => {
       onSave(formData);
       setIsLoading(false);
@@ -75,21 +71,21 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-300 bg-background/95 backdrop-blur-sm animate-fade-in">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-between h-16 px-4">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+      <div className="w-full max-w-2xl h-[90vh] bg-white rounded-xl shadow-xl flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 h-16 border-b border-border bg-white sticky top-0 z-10">
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-black"
           >
             <Icon name="X" size={24} />
           </Button>
-          
-          <h1 className="text-lg font-semibold text-foreground">Edit Profile</h1>
-          
+
+          <h1 className="text-lg font-semibold text-black">Edit Profile</h1>
+
           <Button
             variant="default"
             onClick={handleSave}
@@ -99,12 +95,10 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
             Save
           </Button>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto pb-24">
-        <div className="p-4 space-y-6">
-          {/* Avatar Section */}
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-scroll p-4 space-y-6 text-black">
+          {/* Avatar */}
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-muted cursor-pointer" onClick={handleAvatarClick}>
@@ -116,7 +110,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
               </div>
               <button
                 onClick={handleAvatarClick}
-                className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-2 border-background"
+                className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center border-2 border-white"
               >
                 <Icon name="Camera" size={16} />
               </button>
@@ -133,7 +127,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
             </Button>
           </div>
 
-          {/* Basic Info */}
+          {/* Form Inputs */}
           <div className="space-y-4">
             <Input
               label="Display Name"
@@ -142,6 +136,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="Your display name"
               required
+              className='text-white'
             />
 
             <Input
@@ -150,19 +145,19 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
               value={formData.username}
               onChange={(e) => handleInputChange('username', e.target.value)}
               placeholder="@username"
-              description="This is how others will find you"
               required
+              className='text-white'
             />
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Bio</label>
+              <label className="block text-sm font-medium mb-2">Bio</label>
               <textarea
                 value={formData.bio}
                 onChange={(e) => handleInputChange('bio', e.target.value)}
                 placeholder="Tell the community about your style..."
                 rows={4}
                 maxLength={150}
-                className="w-full p-3 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground resize-none"
+                className="w-full p-3 bg-input border border-border rounded-lg text-white placeholder-muted-foreground resize-none"
               />
               <div className="flex justify-between items-center mt-1">
                 <span className="text-xs text-muted-foreground">
@@ -172,25 +167,18 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
             </div>
 
             <Input
-              label="Website"
-              type="url"
-              value={formData.website}
-              onChange={(e) => handleInputChange('website', e.target.value)}
-              placeholder="https://your-website.com"
-            />
-
-            <Input
               label="Location"
               type="text"
               value={formData.location}
               onChange={(e) => handleInputChange('location', e.target.value)}
               placeholder="City, Country"
+              className='text-white'
             />
           </div>
 
           {/* Style Tags */}
           <div>
-            <label className="block text-sm font-medium text-foreground mb-3">Style Tags</label>
+            <label className="block text-sm font-medium mb-3">Style Tags</label>
             <div className="space-y-3">
               <div className="flex space-x-2">
                 <input
@@ -198,14 +186,14 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   placeholder="Add a style tag..."
-                  className="flex-1 p-2 bg-input border border-border rounded-lg text-foreground placeholder-muted-foreground"
-                  onKeyPress={(e) => e.key === 'Enter' && addStyleTag()}
+                  className="flex-1 p-2 bg-input border border-border rounded-lg text-white placeholder-muted-foreground"
+                  onKeyDown={(e) => e.key === 'Enter' && addStyleTag()}
                 />
                 <Button variant="outline" onClick={addStyleTag} disabled={!newTag.trim()}>
                   Add
                 </Button>
               </div>
-              
+
               {formData.styleTags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {formData.styleTags.map((tag, index) => (
@@ -225,47 +213,6 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Privacy Settings */}
-          <div className="space-y-4">
-            <h3 className="text-md font-semibold text-foreground">Privacy Settings</h3>
-            
-            <div className="flex items-center justify-between p-3 bg-card rounded-xl border border-border">
-              <div>
-                <h4 className="font-medium text-foreground">Private Account</h4>
-                <p className="text-sm text-muted-foreground">
-                  Only approved followers can see your content
-                </p>
-              </div>
-              <button
-                onClick={() => handleInputChange('isPrivate', !formData.isPrivate)}
-                className={`
-                  relative w-12 h-6 rounded-full animation-spring
-                  ${formData.isPrivate ? 'bg-primary' : 'bg-muted'}
-                `}
-              >
-                <div
-                  className={`
-                    absolute top-0.5 w-5 h-5 bg-white rounded-full shadow animation-spring
-                    ${formData.isPrivate ? 'left-6' : 'left-0.5'}
-                  `}
-                />
-              </button>
-            </div>
-          </div>
-
-          {/* Account Actions */}
-          <div className="space-y-3 pt-4 border-t border-border">
-            <Button variant="outline" className="w-full" iconName="Settings" iconPosition="left">
-              Account Settings
-            </Button>
-            <Button variant="outline" className="w-full" iconName="Shield" iconPosition="left">
-              Privacy & Safety
-            </Button>
-            <Button variant="destructive" className="w-full" iconName="LogOut" iconPosition="left">
-              Sign Out
-            </Button>
           </div>
         </div>
       </div>
