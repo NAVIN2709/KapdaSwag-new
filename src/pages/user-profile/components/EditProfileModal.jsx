@@ -1,26 +1,28 @@
-import React, { useState, useRef } from 'react';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
+import React, { useState, useRef } from "react";
+import Icon from "../../../components/AppIcon";
+import Image from "../../../components/AppImage";
+import Button from "../../../components/ui/Button";
+import Input from "../../../components/ui/Input";
 
 const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    username: user?.username || '',
-    bio: user?.bio || '',
-    location: user?.location || '',
+    name: user?.name || "",
+    username: user?.username || "",
+    bio: user?.bio || "",
+    location: user?.location || "",
     styleTags: user?.styleTags || [],
-    avatar: user?.avatar || '',
+    avatar: user?.avatar || "",
+    instagram: user?.instagram || "",
+    snapchat: user?.snapchat || "",
   });
-  const [newTag, setNewTag] = useState('');
+  const [newTag, setNewTag] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleAvatarClick = () => {
@@ -32,7 +34,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setFormData(prev => ({ ...prev, avatar: e.target.result }));
+        setFormData((prev) => ({ ...prev, avatar: e.target.result }));
       };
       reader.readAsDataURL(file);
     }
@@ -41,18 +43,18 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   const addStyleTag = () => {
     const trimmed = newTag.trim();
     if (trimmed && !formData.styleTags.includes(trimmed)) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         styleTags: [...prev.styleTags, trimmed],
       }));
-      setNewTag('');
+      setNewTag("");
     }
   };
 
   const removeStyleTag = (tagToRemove) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      styleTags: prev.styleTags.filter(tag => tag !== tagToRemove),
+      styleTags: prev.styleTags.filter((tag) => tag !== tagToRemove),
     }));
   };
 
@@ -73,7 +75,9 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
           <Button variant="ghost" size="icon" onClick={onClose}>
             <Icon name="X" size={22} />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground">Edit Profile</h1>
+          <h1 className="text-lg font-semibold text-foreground">
+            Edit Profile
+          </h1>
           <Button
             variant="default"
             onClick={handleSave}
@@ -89,8 +93,15 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
           {/* Avatar */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative group">
-              <div className="w-28 h-28 rounded-full overflow-hidden bg-muted cursor-pointer" onClick={handleAvatarClick}>
-                <Image src={formData.avatar} alt="avatar" className="w-full h-full object-cover" />
+              <div
+                className="w-28 h-28 rounded-full overflow-hidden bg-muted cursor-pointer"
+                onClick={handleAvatarClick}
+              >
+                <Image
+                  src={formData.avatar}
+                  alt="avatar"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div
                 onClick={handleAvatarClick}
@@ -98,7 +109,13 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
               >
                 <Icon name="Camera" size={16} />
               </div>
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </div>
             <Button variant="outline" size="sm" onClick={handleAvatarClick}>
               Change Photo
@@ -110,14 +127,14 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
             <Input
               label="Name"
               value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              onChange={(e) => handleInputChange("name", e.target.value)}
               placeholder="Enter your full name"
               required
             />
             <Input
               label="Username"
               value={formData.username}
-              onChange={(e) => handleInputChange('username', e.target.value)}
+              onChange={(e) => handleInputChange("username", e.target.value)}
               placeholder="@username"
               required
             />
@@ -127,7 +144,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
                 rows={4}
                 value={formData.bio}
                 maxLength={150}
-                onChange={(e) => handleInputChange('bio', e.target.value)}
+                onChange={(e) => handleInputChange("bio", e.target.value)}
                 placeholder="Tell the community about your style..."
                 className="w-full bg-input border border-border rounded-lg p-3 text-foreground placeholder-muted-foreground resize-none"
               />
@@ -138,10 +155,23 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
             <Input
               label="Location"
               value={formData.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
+              onChange={(e) => handleInputChange("location", e.target.value)}
               placeholder="City, Country"
             />
           </div>
+          <Input
+            label="Instagram"
+            value={formData.instagram}
+            onChange={(e) => handleInputChange("instagram", e.target.value)}
+            placeholder="your_instagram_handle"
+          />
+
+          <Input
+            label="Snapchat"
+            value={formData.snapchat}
+            onChange={(e) => handleInputChange("snapchat", e.target.value)}
+            placeholder="your_snapchat_username"
+          />
 
           {/* Style Tags */}
           <div>
@@ -151,11 +181,15 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
                 type="text"
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addStyleTag()}
+                onKeyDown={(e) => e.key === "Enter" && addStyleTag()}
                 placeholder="Add tag e.g. streetwear"
                 className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm text-foreground"
               />
-              <Button variant="outline" onClick={addStyleTag} disabled={!newTag.trim()}>
+              <Button
+                variant="outline"
+                onClick={addStyleTag}
+                disabled={!newTag.trim()}
+              >
                 Add
               </Button>
             </div>

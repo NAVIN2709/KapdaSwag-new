@@ -6,12 +6,11 @@ import Icon from "../../components/AppIcon";
 import Button from "../../components/ui/Button";
 import FriendsList from "./components/FriendsList";
 import SearchBar from "./components/SearchBar";
-import ActivityFeed from "./components/ActivityFeed";
 import SuggestedUsers from "./components/SuggestedUsers";
 
 const FriendDiscovery = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("suggested");
+  const [activeTab, setActiveTab] = useState("friends");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -218,7 +217,6 @@ const FriendDiscovery = () => {
             {[
               { id: "friends", label: "Friends", icon: "Users" },
               { id: "suggested", label: "Suggested", icon: "Sparkles" },
-              { id: "activity", label: "Activity", icon: "Bell" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -255,12 +253,6 @@ const FriendDiscovery = () => {
                 onChat={(friend) => navigate(`/chats/${friend.id}`)}
                 onRemove={(friend) => alert(`Removed ${friend.displayName}`)}
               />
-            </div>
-          )}
-
-          {activeTab === "activity" && (
-            <div className="max-w-2xl mx-auto">
-              <ActivityFeed onUserClick={handleUserClick} />
             </div>
           )}
         </div>

@@ -97,12 +97,6 @@ const SuggestedUsers = ({ onUserClick, onFollow }) => {
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-foreground truncate">@{user.username}</h4>
                     <p className="text-sm text-muted-foreground truncate">{user.displayName}</p>
-                    
-                    {/* Style Match */}
-                    <div className="flex items-center space-x-1 mt-1">
-                      <Icon name="Sparkles" size={12} className="text-primary" />
-                      <span className="text-xs text-primary font-medium">{user.styleMatch}% match</span>
-                    </div>
                   </div>
                 </div>
 

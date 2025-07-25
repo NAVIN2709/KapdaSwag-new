@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
-import Button from '../../../components/ui/Button';
+import React, { useState } from "react";
+import Icon from "../../../components/AppIcon";
+import Image from "../../../components/AppImage";
+import Button from "../../../components/ui/Button";
+import { FaInstagram, FaSnapchatGhost } from "react-icons/fa";
 
-const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage }) => {
+const ProfileHeader = ({
+  user,
+  isOwnProfile,
+  onEditProfile,
+  onFollow,
+  onMessage,
+}) => {
   const [isFriends, setIsFollowing] = useState(user.isFriends || false);
 
   const handleFollowClick = () => {
@@ -27,7 +34,9 @@ const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage 
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2 mb-1">
-            <h1 className="text-xl font-bold text-foreground truncate">{user.name}</h1>
+            <h1 className="text-xl font-bold text-foreground truncate">
+              {user.name}
+            </h1>
           </div>
           <p className="text-muted-foreground mb-2">@{user.username}</p>
         </div>
@@ -100,6 +109,35 @@ const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage 
           </div>
         </div>
       )}
+      {/* Social Links */}
+      {(user.instagram || user.snapchat) && (
+        <div className="mb-4">
+          <div className="flex items-center space-x-4 text-muted-foreground">
+            {user.instagram && (
+              <a
+                href={`https://instagram.com/${user.instagram}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center space-x-1 hover:text-pink-500 transition"
+              >
+                <FaInstagram className="w-4 h-4" />
+                <span className="text-sm">@{user.instagram}</span>
+              </a>
+            )}
+            {user.snapchat && (
+              <a
+                href={`https://snapchat.com/add/${user.snapchat}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center space-x-1 hover:text-yellow-500 transition"
+              >
+                <FaSnapchatGhost className="w-4 h-4" />
+                <span className="text-sm">@{user.snapchat}</span>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Drip Rating */}
       <div className="flex items-center justify-between">
@@ -109,14 +147,18 @@ const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage 
             <span className="text-sm text-muted-foreground">Drip Rating</span>
           </div>
           <div className="flex items-center space-x-1">
-            <span className="text-lg font-bold text-primary font-mono">{user.dripRating}</span>
+            <span className="text-lg font-bold text-primary font-mono">
+              {user.dripRating}
+            </span>
             <span className="text-sm text-muted-foreground">/100</span>
           </div>
         </div>
 
         <div className="flex items-center space-x-2">
           <Icon name="TrendingUp" size={16} className="text-accent" />
-          <span className="text-sm text-muted-foreground">Vibe: {user.vibeScore}</span>
+          <span className="text-sm text-muted-foreground">
+            Vibe: {user.vibeScore}
+          </span>
         </div>
       </div>
 
@@ -125,7 +167,9 @@ const ProfileHeader = ({ user, isOwnProfile, onEditProfile, onFollow, onMessage 
         <div className="mt-4 pt-4 border-t border-border">
           <div className="flex items-center space-x-2 mb-2">
             <Icon name="Award" size={16} className="text-warning" />
-            <span className="text-sm font-medium text-foreground">Achievements</span>
+            <span className="text-sm font-medium text-foreground">
+              Achievements
+            </span>
           </div>
           <div className="flex flex-wrap gap-2">
             {user.badges.map((badge, index) => (

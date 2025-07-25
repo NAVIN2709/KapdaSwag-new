@@ -9,7 +9,6 @@ const BottomNavigation = () => {
   const [notifications] = useState({
     community: 3,
     connect: 1,
-    chat: 2, // unread chat messages
   });
 
   const navigationItems = [
@@ -40,13 +39,6 @@ const BottomNavigation = () => {
       icon: 'Heart',
       path: '/friend-discovery',
       badgeCount: notifications.connect,
-    },
-    {
-      id: 'chat',
-      label: 'Chat',
-      icon: 'MessageCircle',
-      path: '/chats',
-      badgeCount: notifications.chat,
     },
     {
       id: 'profile',

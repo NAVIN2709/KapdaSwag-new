@@ -35,6 +35,8 @@ const UserProfile = () => {
       dripRating: 87,
       vibeScore: "Trendsetter",
       isVerified: true,
+      instagram:"ft._navin",
+      snapchat:"navin2006",
       isOnline: true,
       styleTags: ["vintage", "sustainable", "minimalist", "streetwear"],
       badges: [

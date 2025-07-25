@@ -8,7 +8,7 @@ const ProfileHeader = ({ user }) => {
   return (
     <div className="flex items-center gap-3 p-3 border-b shadow-sm">
       <button
-        onClick={() => navigate('/chats')}
+        onClick={() => navigate('/friend-discovery')}
         className="p-1 rounded-full hover:bg-gray-200"
       >
         <ArrowLeft size={20} />
