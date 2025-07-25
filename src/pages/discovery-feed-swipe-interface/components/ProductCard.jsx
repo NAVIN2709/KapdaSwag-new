@@ -104,11 +104,23 @@ const ProductCard = ({
     >
       {/* Card Content */}
       <div className="relative w-full h-full bg-muted/20 overflow-hidden rounded-2xl">
-        <Image
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover"
-        />
+        {product.video ? (
+          <video
+            src={product.video}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <Image
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        )}
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
         {/* Brand Logo */}
@@ -129,7 +141,7 @@ const ProductCard = ({
         )}
 
         {/* Quick Actions */}
-        <div className="absolute right-6 bottom-32 transform -translate-y-1/2 space-y-3 space-x-2 z-50">
+        <div className="absolute right-6 bottom-[150px] transform -translate-y-1/2 space-y-3 space-x-2 z-50">
           <Button
             variant="ghost"
             size="icon"
@@ -176,6 +188,12 @@ const ProductCard = ({
           <div className="space-y-2">
             <h2 className="text-xl font-bold leading-tight">{product.name}</h2>
             <p className="text-white/80 text-sm">{product.brand}</p>
+            {product.designer && (
+              <p className="text-sm text-white/60 italic">
+                Designed by{" "}
+                <span className="font-bold">{product.designer}</span>
+              </p>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <span className="text-2xl font-bold font-mono">

@@ -29,6 +29,7 @@ const DiscoveryFeedSwipeInterface = () => {
       brand: "Urban Threads",
       price: 89.99,
       originalPrice: 129.99,
+      video:"https://media.istockphoto.com/id/1223030415/video/she-is-so-cool.mp4?s=mp4-640x640-is&k=20&c=wRTO589HVyFrvBSUXsm8_wvBT7vsAF-NCGvp3_Jf2jA=",
       image:
         "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=600&fit=crop",
       brandLogo:
@@ -39,6 +40,7 @@ const DiscoveryFeedSwipeInterface = () => {
       tags: ["vintage", "denim", "casual"],
       description:
         "Classic vintage-inspired denim jacket with modern fit and premium quality construction.",
+        designer:"@navin2006",
       comments: {
         text: [
           { username: "mia", comment: "Looks great on snow trips!" },
@@ -63,6 +65,8 @@ const DiscoveryFeedSwipeInterface = () => {
       name: "Floral Summer Dress",
       brand: "Bloom & Co",
       price: 65.0,
+      designer:"@kapdaswag",
+      video:"https://media.istockphoto.com/id/1195291668/video/back-view-of-shopping-woman-walking-on-city-street-tourist-girl-looking-camera.mp4?s=mp4-640x640-is&k=20&c=ZG5KbNyqVvCZ3MpmkSVJU5BrcR8kRXWo-GYdPVA3ZE4=",
       image:
         "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&h=600&fit=crop",
       brandLogo:
@@ -93,6 +97,7 @@ const DiscoveryFeedSwipeInterface = () => {
       brand: "Clean Steps",
       price: 120.0,
       originalPrice: 150.0,
+      designer:"@navin2006",
       image:
         "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=600&fit=crop",
       brandLogo:
@@ -116,6 +121,7 @@ const DiscoveryFeedSwipeInterface = () => {
       name: "Oversized Hoodie",
       brand: "Comfort Zone",
       price: 45.0,
+      designer:"@navin2006",
       image:
         "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=600&fit=crop",
       brandLogo:
@@ -144,6 +150,7 @@ const DiscoveryFeedSwipeInterface = () => {
       id: 5,
       name: "Leather Crossbody Bag",
       brand: "Artisan Craft",
+      designer:"@navin2006",
       price: 180.0,
       image:
         "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=600&fit=crop",
@@ -167,6 +174,7 @@ const DiscoveryFeedSwipeInterface = () => {
       id: 6,
       name: "High-Waisted Jeans",
       brand: "Denim Dreams",
+      designer:"@navin2006",
       price: 75.0,
       originalPrice: 95.0,
       image:
