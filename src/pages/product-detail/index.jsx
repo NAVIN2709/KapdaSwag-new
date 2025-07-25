@@ -7,7 +7,6 @@ import Button from '../../components/ui/Button';
 import ProductImageCarousel from './components/ProductImageCarousel';
 import ProductInfo from './components/ProductInfo';
 import VideoReviewSection from './components/VideoReviewSection';
-import CommunityEngagement from './components/CommunityEngagement';
 import RelatedProducts from './components/RelatedProducts';
 import ActionButtons from './components/ActionButtons';
 
@@ -94,7 +93,6 @@ const ProductDetail = () => {
   const sections = [
     { id: 'details', label: 'Details', icon: 'Info' },
     { id: 'reviews', label: 'Reviews', icon: 'Play' },
-    { id: 'community', label: 'Community', icon: 'Users' }
   ];
 
   return (
@@ -213,10 +211,6 @@ const ProductDetail = () => {
 
             {activeSection === 'reviews' && (
               <VideoReviewSection />
-            )}
-
-            {activeSection === 'community' && (
-              <CommunityEngagement productId={product.id} />
             )}
           </div>
         </div>
