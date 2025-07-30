@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter, Routes as RouterRoutes, Route, useNavigate } from "react-router-dom";
 import ScrollToTop from "components/ScrollToTop";
 import ErrorBoundary from "components/ErrorBoundary";
 
@@ -14,10 +14,30 @@ import NotFound from "pages/NotFound";
 import ChatScreen from "pages/chats/[id]";
 import Profile from "pages/user-profile/[id]";
 import Login from "pages/login";
+import Onboarding from "pages/onboarding";
+import SplashScreen from "pages/splashscreen";
 
 // Auth
 import ProtectedRoute from "../src/components/ProtectedRoutes";
-import { AuthProvider } from "../src/context/AuthContext";
+import { AuthProvider, useAuth } from "../src/context/AuthContext";
+
+function SplashWrapper() {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentUser) {
+        navigate("/"); // Go to home if logged in
+      } else {
+        navigate("/login"); // Else go to login
+      }
+    }, 2500); // Show splash for 2.5 seconds
+    return () => clearTimeout(timer);
+  }, [currentUser, navigate]);
+
+  return <SplashScreen />;
+}
 
 const Routes = () => {
   return (
@@ -26,16 +46,27 @@ const Routes = () => {
         <ErrorBoundary>
           <ScrollToTop />
           <RouterRoutes>
+            {/* Splash Screen always first */}
+            <Route path="/" element={<SplashWrapper />} />
+
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="*" element={<NotFound />} />
 
             {/* Protected Routes */}
             <Route
-              path="/"
+              path="/home"
               element={
                 <ProtectedRoute>
                   <DiscoveryFeedSwipeInterface />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/onboarding"
+              element={
+                <ProtectedRoute>
+                  <Onboarding />
                 </ProtectedRoute>
               }
             />

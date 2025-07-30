@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       console.log("started");
       await signInWithPopup(auth, provider);
       console.log("ended");
-      navigate("/");
+      navigate("/onboarding");
     } catch (error) {
       console.error("Google Sign-In Error:", error);
     }
