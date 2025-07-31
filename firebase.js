@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { initializeFirestore, persistentLocalCache } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: "AIzaSyCD87_1MzXb6Kr1tA2fuWqHuMcnsthQiOI",
@@ -17,6 +18,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache()
+});
 const analytics = getAnalytics(app);
 export { db, auth };
