@@ -161,7 +161,7 @@ const FriendDiscovery = () => {
   };
 
   const handleUserSelect = (user) => {
-    navigate("/user-profile", { state: { userId: user.id } });
+    navigate(`/profile/${user}`);
   };
 
   const handleUserClick = (user) => {

@@ -15,12 +15,6 @@ const ProfileTabs = ({ activeTab, onTabChange, counts }) => {
       icon: 'Grid3X3',
       count: counts.content
     },
-    {
-      id: 'preferences',
-      label: 'Style',
-      icon: 'Heart',
-      count: counts.preferences
-    }
   ];
 
   return (

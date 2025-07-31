@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { FcGoogle } from "react-icons/fc";
+import { useNavigate } from "react-router-dom";
+import { getUserData } from "functions/Userfunctions";
 
 const videos = [
   "https://media.istockphoto.com/id/2192664753/video/young-female-customer-selecting-handbag-in-modern-boutique-store.mp4?s=mp4-640x640-is&k=20&c=9gvey5V0VoTNHAtcMwQ7GYKvVRwCL47cnkvQxqW5zb4=",
-  "https://media.istockphoto.com/id/1872396434/video/black-woman-using-virtual-reality-headset-for-online-shopping-browsing-through-stylish.mp4?s=mp4-640x640-is&k=20&c=5M7r9wsQkfzwJ4wNMeXsdoD9SPc79XRQ5T2sbMcjVKM="
+  "https://media.istockphoto.com/id/1872396434/video/black-woman-using-virtual-reality-headset-for-online-shopping-browsing-through-stylish.mp4?s=mp4-640x640-is&k=20&c=5M7r9wsQkfzwJ4wNMeXsdoD9SPc79XRQ5T2sbMcjVKM=",
 ];
 
 export default function Login() {
-  const { loginWithGoogle } = useAuth();
+  const navigate = useNavigate();
+  const { loginWithGoogle, authLoading, user } = useAuth();
   const [currentVideo, setCurrentVideo] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -60,10 +69,38 @@ export default function Login() {
           onClick={loginWithGoogle}
           className="flex items-center justify-center w-full max-w-xs bg-background border border-white/30 rounded-full py-3 px-4 hover:bg-white/30 active:scale-[0.98] transition-all duration-200 backdrop-blur-sm shadow-lg"
         >
-          <FcGoogle className="text-2xl mr-3" />
-          <span className="text-white font-medium tracking-wide">
-            Sign in with Google
-          </span>
+          {authLoading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 mr-3 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              <span className="font-medium">Signing in...</span>
+            </>
+          ) : (
+            <>
+              <FcGoogle className="text-2xl mr-3" />
+              <span className="text-white font-medium tracking-wide">
+                Sign in with Google
+              </span>
+            </>
+          )}
         </button>
       </div>
     </div>

@@ -1,22 +1,90 @@
-import React, { useState } from 'react';
-import { FaInstagram, FaSnapchatGhost, FaArrowLeft, FaPen } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import {
+  FaInstagram,
+  FaSnapchatGhost,
+  FaArrowLeft,
+  FaPen,
+} from "react-icons/fa";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  getFriends,
+  getUserData,
+  sendFriendRequest
+} from "functions/Userfunctions";
+import { useAuth } from "../../context/AuthContext";
 
 const ProfileComponent = ({ profile, isOwnProfile = false }) => {
-  const [followState, setFollowState] = useState('unfollowed'); // 'unfollowed' | 'requested' | 'following'
+  const { user } = useAuth();
+  const { id } = useParams();
+  const [followState, setFollowState] = useState("unfollowed");
+  const [loadingFollowState, setLoadingFollowState] = useState(true);
   const navigate = useNavigate();
 
-  const handleFollow = () => {
-    if (followState === 'unfollowed') setFollowState('requested');
-    else if (followState === 'requested') setFollowState('following');
-    else setFollowState('unfollowed');
-  };
+  useEffect(() => {
+    const checkFollowing = async () => {
+      if (!user?.uid || !id) return;
+
+      try {
+        const userdata = await getUserData(user.uid);
+        const matched = await getFriends(user.uid);
+
+        const isFollowing = matched.some(friend => friend.id === id);
+        const isRequest = userdata.sentRequests?.some(friend => friend.id === id);
+
+        if (isFollowing) {
+          setFollowState("following");
+        } else if (isRequest) {
+          setFollowState("requested");
+        } else {
+          setFollowState("unfollowed");
+        }
+      } catch (error) {
+        console.error("Error checking follow state:", error);
+      } finally {
+        setLoadingFollowState(false);
+      }
+    };
+
+    checkFollowing();
+  }, [user, id]);
+
+  const handleFollow = async () => {
+  try {
+    if (followState === "unfollowed") {
+      // Send friend request in Firestore
+      await sendFriendRequest(user.uid, id);
+      setFollowState("requested");
+    } 
+    else if (followState === "following") {
+      // TODO: Add Firestore unfollow / remove friend logic here
+      // await removeFriend(user.uid, id);
+      setFollowState("unfollowed");
+    }
+    else if (followState === "requested") {
+      // Optionally: cancel the request
+      // await cancelFriendRequest(user.uid, id);
+      setFollowState("unfollowed");
+    }
+  } catch (error) {
+    console.error("Error updating follow state:", error);
+  }
+};
+
+
+  // ✅ Show loader until follow state is ready
+  if (loadingFollowState) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-white px-6 py-6">
       {/* Back Button */}
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/friend-discovery")}
         className="flex items-center text-gray-300 hover:text-white mb-4"
       >
         <FaArrowLeft className="mr-2" />
@@ -26,7 +94,7 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
       {/* Avatar + Info */}
       <div className="text-center space-y-4">
         <img
-          src={profile.avatar || 'https://i.pravatar.cc/150?img=12'}
+          src={profile.profilePic || "https://i.pravatar.cc/150?img=12"}
           className="w-24 h-24 mx-auto rounded-full object-cover border-4 border-pink-500"
           alt="Profile"
         />
@@ -44,39 +112,38 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
           </button>
         ) : (
           <button
-            onClick={handleFollow}
+            onClick={followState === "requested" ? undefined : handleFollow}
+            disabled={followState === "requested"}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
-              followState === 'unfollowed'
-                ? 'bg-pink-600 hover:bg-pink-700'
-                : followState === 'requested'
-                ? 'bg-yellow-400 text-black hover:bg-yellow-500'
-                : 'bg-gray-300 text-black hover:bg-gray-400'
+              followState === "unfollowed"
+                ? "bg-pink-600 hover:bg-pink-700"
+                : followState === "requested"
+                ? "bg-yellow-400 text-black cursor-not-allowed"
+                : "bg-gray-300 text-black hover:bg-gray-400"
             }`}
           >
-            {followState === 'unfollowed'
-              ? 'Follow'
-              : followState === 'requested'
-              ? 'Requested'
-              : 'Unfollow'}
+            {followState === "unfollowed"
+              ? "Follow"
+              : followState === "requested"
+              ? "Requested"
+              : "Unfollow"}
           </button>
         )}
       </div>
 
       {/* Bio */}
       {profile.bio && (
-        <p className="mt-6 text-center text-gray-200 px-4">
-          {profile.bio}
-        </p>
+        <p className="mt-6 text-center text-gray-200 px-4">{profile.bio}</p>
       )}
 
       {/* Tags */}
       <div className="mt-4 flex flex-wrap justify-center gap-2">
-        {profile.styles?.map((style, idx) => (
+        {profile.interests?.map((interest, idx) => (
           <span
             key={idx}
             className="bg-[#1e293b] text-white border border-gray-600 px-3 py-1 text-sm rounded-full"
           >
-            #{style.toLowerCase()}
+            #{interest.toLowerCase()}
           </span>
         ))}
       </div>
@@ -84,12 +151,20 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
       {/* Socials */}
       <div className="mt-6 flex justify-center gap-6 text-2xl text-pink-400">
         {profile.instagram && (
-          <a href={`https://instagram.com/${profile.instagram}`} target="_blank" rel="noreferrer">
+          <a
+            href={`https://instagram.com/${profile.instagram}`}
+            target="_blank"
+            rel="noreferrer"
+          >
             <FaInstagram className="hover:text-pink-500 transition" />
           </a>
         )}
         {profile.snapchat && (
-          <a href={`https://snapchat.com/add/${profile.snapchat}`} target="_blank" rel="noreferrer">
+          <a
+            href={`https://snapchat.com/add/${profile.snapchat}`}
+            target="_blank"
+            rel="noreferrer"
+          >
             <FaSnapchatGhost className="hover:text-yellow-400 transition" />
           </a>
         )}

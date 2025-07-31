@@ -1,78 +1,64 @@
-import { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useParams } from "react-router-dom";
 import clsx from "clsx";
 import ProfileHeader from "../chats/components/ProfileHeader";
 import MessageInput from "../chats/components/MessageInput";
 import { motion } from "framer-motion";
 import { Dialog } from "@headlessui/react";
-import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext"; // 👈 your auth hook
+import useChat from "functions/useChat"; // 👈 hook you wrote
+import { getUserData } from "functions/Userfunctions";
 
 const ChatScreen = () => {
-  const { id } = useParams();
+  const { id: otherUserId } = useParams();
+  const { user: authUser } = useAuth();
+  const currentUserId = authUser?.uid;
+  const { messages, handleSend:handleSendMessage } = useChat({ currentUserId, otherUserId });
 
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [reaction, setReaction] = useState(null);
+  const [otheruserdata, setOtheruserdata] = useState(null);
 
-  const user = {
-    id,
-    username: `User ${id}`,
-    profilePicture: `https://i.pravatar.cc/150?img=9`,
+useEffect(() => {
+  if (!otherUserId) return;
+  const fetchData = async () => {
+    try {
+      const data = await getUserData(otherUserId); // Firestore fetch
+      setOtheruserdata(data);
+    } catch (error) {
+      console.error("Error fetching other user data:", error);
+    }
   };
+  fetchData();
+}, [otherUserId]);
 
-  const currentUserId = "me";
+// Prevent error when data not loaded yet
+if (!otheruserdata || !currentUserId) {
+  return (
+    <div className="flex items-center justify-center h-screen text-gray-400">
+      Loading chat...
+    </div>
+  );
+}
 
-  const messages = [
-    {
-      id: 1,
-      senderId: "me",
-      text: "Hey! How’s it going? 😄",
-      time: "10:35 AM",
-    },
-    {
-      id: 2,
-      senderId: id,
-      text: "All good! Check this out 👀",
-      time: "10:36 AM",
-    },
-    {
-      id: 3,
-      senderId: id,
-      image: "https://images.unsplash.com/photo-1518717758536-85ae29035b6d",
-      time: "10:36 AM",
-    },
-    {
-      id: 4,
-      senderId: "me",
-      text: "🔥🔥🔥 Bro that’s sick!",
-      time: "10:37 AM",
-    },
-    {
-      id: 5,
-      senderId: id,
-      text: "Thanks, clicked it yesterday evening.",
-      time: "10:38 AM",
-    },
-    {
-      id: 6,
-      senderId: "me",
-      image: "https://images.unsplash.com/photo-1581291519195-ef11498d1cf5",
-      time: "10:39 AM",
-    },
-  ];
+const user = {
+  id: otherUserId,
+  username: otheruserdata.username || "Unknown User",
+  profilePicture: otheruserdata.profilePic || "https://i.pravatar.cc/150?u=default",
+};
+
 
   const handleImageClick = (url) => setFullscreenImage(url);
   const handleDoubleTap = (id) => setReaction(id);
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white">
-      <Link to={`/profile/${user.id}`}>
-        <ProfileHeader user={user} />
-      </Link>
+      <ProfileHeader user={user} />
 
       {/* Message List */}
       <div className="flex-1 overflow-y-scroll p-4 space-y-4">
         {messages.map((msg) => {
-          const isMe = msg.senderId === currentUserId;
+          const isMe = msg.sender === currentUserId;
           return (
             <div
               key={msg.id}
@@ -103,10 +89,15 @@ const ChatScreen = () => {
                 )}
               </motion.div>
               <span className="text-xs text-gray-400 mt-1 block">
-                {isMe ? "You" : user.username} • {msg.time}
+                {isMe ? "You" : user.username} •{" "}
+                {msg.timestamp?.toDate
+                  ? msg.timestamp.toDate().toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : ""}
               </span>
 
-              {/* Reaction animation (❤️) */}
               {reaction === msg.id && (
                 <motion.div
                   className="absolute -top-6 text-3xl"
@@ -122,15 +113,14 @@ const ChatScreen = () => {
       </div>
 
       {/* Message Input */}
-      <MessageInput />
+      <MessageInput onSend={handleSendMessage} />
 
       {/* Fullscreen image viewer */}
       <Dialog open={!!fullscreenImage} onClose={() => setFullscreenImage(null)}>
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
           <button
             onClick={() => setFullscreenImage(null)}
-            className="absolute top-6 right-6 text-white text-2xl bg-black/50 hover:bg-black/70 rounded-full p-2 focus:outline-none"
-            aria-label="Close image viewer"
+            className="absolute top-6 right-6 text-white text-2xl bg-black/50 hover:bg-black/70 rounded-full p-2"
           >
             ✕
           </button>

@@ -3,15 +3,18 @@ import Icon from "../../../components/AppIcon";
 import Image from "../../../components/AppImage";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
+import { saveUserData } from "functions/Userfunctions"; // <-- Import Firestore function
+import { useAuth } from "../../../context/AuthContext"; // <-- To get logged-in user
 
 const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
+  const { user: authUser } = useAuth(); // current logged in user
   const [formData, setFormData] = useState({
     name: user?.name || "",
     username: user?.username || "",
     bio: user?.bio || "",
     location: user?.location || "",
-    styleTags: user?.styleTags || [],
-    avatar: user?.avatar || "",
+    interests: user?.interests || [],
+    profilePic: user?.avatar || "",
     instagram: user?.instagram || "",
     snapchat: user?.snapchat || "",
   });
@@ -34,7 +37,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setFormData((prev) => ({ ...prev, avatar: e.target.result }));
+        setFormData((prev) => ({ ...prev, profilePic: e.target.result }));
       };
       reader.readAsDataURL(file);
     }
@@ -42,10 +45,10 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
 
   const addStyleTag = () => {
     const trimmed = newTag.trim();
-    if (trimmed && !formData.styleTags.includes(trimmed)) {
+    if (trimmed && !formData.interests.includes(trimmed)) {
       setFormData((prev) => ({
         ...prev,
-        styleTags: [...prev.styleTags, trimmed],
+        interests: [...prev.interests, trimmed],
       }));
       setNewTag("");
     }
@@ -54,17 +57,26 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   const removeStyleTag = (tagToRemove) => {
     setFormData((prev) => ({
       ...prev,
-      styleTags: prev.styleTags.filter((tag) => tag !== tagToRemove),
+      interests: prev.interests.filter((tag) => tag !== tagToRemove),
     }));
   };
 
   const handleSave = async () => {
+    if (!authUser?.uid) {
+      console.error("No authenticated user found");
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
-      onSave(formData);
-      setIsLoading(false);
+    try {
+      await saveUserData(authUser.uid, formData); // Save to Firestore
+      if (onSave) onSave(formData); // Optional: update UI without refetch
       onClose();
-    }, 1000);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -98,7 +110,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
                 onClick={handleAvatarClick}
               >
                 <Image
-                  src={formData.avatar}
+                  src={formData.profilePic}
                   alt="avatar"
                   className="w-full h-full object-cover"
                 />
@@ -193,9 +205,9 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
                 Add
               </Button>
             </div>
-            {formData.styleTags.length > 0 && (
+            {formData.interests.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {formData.styleTags.map((tag, idx) => (
+                {formData.interests.map((tag, idx) => (
                   <div
                     key={idx}
                     className="flex items-center space-x-2 px-3 py-1 rounded-full text-sm bg-primary/10 text-primary border border-primary/20"

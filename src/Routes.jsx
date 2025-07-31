@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter, Routes as RouterRoutes, Route, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes as RouterRoutes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 import ScrollToTop from "components/ScrollToTop";
 import ErrorBoundary from "components/ErrorBoundary";
 
@@ -18,28 +23,20 @@ import Onboarding from "pages/onboarding";
 import SplashScreen from "pages/splashscreen";
 
 // Auth
-import ProtectedRoute from "../src/components/ProtectedRoutes";
-import { AuthProvider, useAuth } from "../src/context/AuthContext";
-
-function SplashWrapper() {
-  const navigate = useNavigate();
-  const { currentUser } = useAuth();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentUser) {
-        navigate("/"); // Go to home if logged in
-      } else {
-        navigate("/login"); // Else go to login
-      }
-    }, 2500); // Show splash for 2.5 seconds
-    return () => clearTimeout(timer);
-  }, [currentUser, navigate]);
-
-  return <SplashScreen />;
-}
+import ProtectedRoute from "./components/ProtectedRoutes";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 
 const Routes = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const splashTimeout = setTimeout(() => {
+      setShowSplash(false);
+    }, 3000);
+  });
+  if (showSplash) return <SplashScreen />;
+
   return (
     <BrowserRouter>
       <AuthProvider>
@@ -47,7 +44,7 @@ const Routes = () => {
           <ScrollToTop />
           <RouterRoutes>
             {/* Splash Screen always first */}
-            <Route path="/" element={<SplashWrapper />} />
+            <Route path="/splashscreen" element={<SplashScreen />} />
 
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
@@ -55,7 +52,7 @@ const Routes = () => {
 
             {/* Protected Routes */}
             <Route
-              path="/home"
+              path="/"
               element={
                 <ProtectedRoute>
                   <DiscoveryFeedSwipeInterface />

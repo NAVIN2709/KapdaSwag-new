@@ -2,10 +2,19 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiCamera } from "react-icons/fi";
 import { FaInstagram, FaSnapchat } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { saveUserData } from "functions/Userfunctions";
+import { useAuth } from "../../context/AuthContext";
 
 const fashionTags = [
-  "Minimalistic", "Old Money", "Streetwear", "Bohemian",
-  "Vintage", "Casual", "Chic", "Sporty"
+  "Minimalistic",
+  "Old Money",
+  "Streetwear",
+  "Bohemian",
+  "Vintage",
+  "Casual",
+  "Chic",
+  "Sporty",
 ];
 
 const stepImages = [
@@ -15,9 +24,21 @@ const stepImages = [
   "https://i.pinimg.com/736x/be/e6/e2/bee6e28b158ff6a3bcdbe29fb67e465d.jpg",
   "https://i.pinimg.com/736x/21/1d/dd/211ddd9c37e190038cb3b575c777daad.jpg",
 ];
+// Add this array above the component
+const avatarImages = [
+  "https://img.freepik.com/free-vector/smiling-young-man-illustration_1308-174669.jpg",
+  "https://img.freepik.com/free-vector/smiling-woman-traditional-attire_1308-175670.jpg", // cat
+  "https://img.freepik.com/free-vector/smiling-redhaired-boy-illustration_1308-176664.jpg", // dog
+  "https://img.freepik.com/free-vector/smiling-woman-traditional-attire_1308-175837.jpg", // panda
+  "https://img.freepik.com/free-vector/young-man-traditional-attire_1308-173539.jpg", // bunny
+  "https://img.freepik.com/free-vector/woman-floral-costume-illustration_1308-173492.jpg", // monkey
+];
 
 const Onboarding = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [avatarIndex, setAvatarIndex] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
@@ -34,29 +55,24 @@ const Onboarding = () => {
   const handleChange = (e) =>
     setFormData((fd) => ({ ...fd, [e.target.name]: e.target.value }));
 
-  // Upload to Cloudinary Demo
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", "kapdaswag_preset");
-    data.append("cloud_name", "dbzu2zrzt");
-
     setUploading(true);
-    try {
-      const res = await fetch("https://api.cloudinary.com/v1_1/dbzu2zrzt/image/upload", {
-        method: "POST",
-        body: data,
-      });
-      const result = await res.json();
-      setFormData((fd) => ({ ...fd, profilePic: result.secure_url }));
-    } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Image upload failed!");
-    }
-    setUploading(false);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result; // this is the base64 image
+      setFormData((fd) => ({ ...fd, profilePic: base64String }));
+      setUploading(false);
+    };
+    reader.onerror = () => {
+      alert("Image conversion failed");
+      setUploading(false);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const toggleTag = (tag) =>
@@ -67,9 +83,9 @@ const Onboarding = () => {
         : [...fd.tags, tag],
     }));
 
-  const handleSubmit = () => {
-    console.log("Final Data:", formData);
-    // API call here
+  const handleSubmit = async () => {
+    await saveUserData(user.uid, formData);
+    navigate("/");
   };
 
   const progress = (step / 5) * 100;
@@ -86,7 +102,11 @@ const Onboarding = () => {
           transition={{ duration: 0.8 }}
           className="absolute inset-0"
         >
-          <img src={stepImages[step - 1]} alt="" className="w-full h-full object-cover" />
+          <img
+            src={stepImages[step - 1]}
+            alt=""
+            className="w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-black/25" />
         </motion.div>
       </AnimatePresence>
@@ -119,7 +139,9 @@ const Onboarding = () => {
                   exit={{ opacity: 0, y: -40 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <h2 className="text-xl font-extrabold mb-4 text-center">Choose your username</h2>
+                  <h2 className="text-xl font-extrabold mb-4 text-center">
+                    Choose your username
+                  </h2>
                   <input
                     type="text"
                     name="username"
@@ -139,21 +161,91 @@ const Onboarding = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.5 }}
-                  className="flex flex-col items-center"
+                  className="flex flex-col items-center justify-center"
                 >
-                  <h2 className="text-xl font-extrabold mb-4">📸 Upload Profile Pic</h2>
-                  <label className="cursor-pointer group">
+                  <h2 className="text-xl font-extrabold mb-4">
+                    📸 Upload Profile Pic
+                  </h2>
+
+                  {/* Upload Option */}
+                  <label className="cursor-pointer group mb-4">
                     <div className="w-20 h-20 rounded-full bg-white/20 border-4 border-dashed border-white/30 flex items-center justify-center overflow-hidden hover:border-pink-500 transition-all duration-300">
                       {uploading ? (
                         <div className="loader border-2 border-t-2 border-gray-200 rounded-full w-6 h-6 animate-spin"></div>
                       ) : formData.profilePic ? (
-                        <img src={formData.profilePic} alt="Preview" className="w-full h-full object-cover" />
+                        <img
+                          src={formData.profilePic}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <FiCamera className="text-3xl text-gray-300 group-hover:text-pink-400" />
                       )}
                     </div>
-                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
                   </label>
+
+                  {/* Avatar Image Slider */}
+                  <h3 className="text-sm font-semibold mb-2">
+                    Or choose an avatar
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    {/* Back Button */}
+                    <button
+                      onClick={() =>
+                        setAvatarIndex(
+                          (prev) =>
+                            (prev - 1 + avatarImages.length) %
+                            avatarImages.length
+                        )
+                      }
+                      className="p-2 rounded-full bg-white/20 hover:bg-white/30"
+                    >
+                      ⬅
+                    </button>
+
+                    {/* Image Display */}
+                    <motion.img
+                      key={avatarImages[avatarIndex]}
+                      src={avatarImages[avatarIndex]}
+                      alt="avatar"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.4 }}
+                      className={`w-20 h-20 rounded-full border-2 cursor-pointer transition-all ${
+                        formData.profilePic === avatarImages[avatarIndex]
+                          ? "border-pink-500 scale-105"
+                          : "border-white/30 hover:border-pink-300"
+                      }`}
+                      onClick={() =>
+                        setFormData((fd) => ({
+                          ...fd,
+                          profilePic: avatarImages[avatarIndex],
+                        }))
+                      }
+                    />
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() =>
+                        setAvatarIndex(
+                          (prev) => (prev + 1) % avatarImages.length
+                        )
+                      }
+                      className="p-2 rounded-full bg-white/20 hover:bg-white/30"
+                    >
+                      ➡
+                    </button>
+                  </div>
+                  <div className="text-sm font-semibold mt-2">
+                    click to choose
+                  </div>
                 </motion.div>
               )}
 
@@ -166,7 +258,9 @@ const Onboarding = () => {
                   exit={{ opacity: 0, x: -60 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <h2 className="text-2xl font-extrabold mb-4">✍️ Write your bio</h2>
+                  <h2 className="text-2xl font-extrabold mb-4">
+                    ✍️ Write your bio
+                  </h2>
                   <textarea
                     name="bio"
                     value={formData.bio}
@@ -187,7 +281,9 @@ const Onboarding = () => {
                   exit={{ opacity: 0, y: -40 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <h2 className="text-2xl font-extrabold mb-4">📱 Social Handles</h2>
+                  <h2 className="text-2xl font-extrabold mb-4">
+                    📱 Social Handles
+                  </h2>
                   <div className="flex flex-col">
                     <div className="flex items-center">
                       <FaSnapchat className="w-7 h-7 mr-2 mb-2" />
@@ -224,7 +320,9 @@ const Onboarding = () => {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <h2 className="text-2xl font-extrabold mb-4">🎯 Pick your fashion vibe</h2>
+                  <h2 className="text-2xl font-extrabold mb-4">
+                    🎯 Pick your fashion vibe
+                  </h2>
                   <div className="flex flex-wrap gap-2">
                     {fashionTags.map((tag) => (
                       <motion.button
@@ -255,7 +353,9 @@ const Onboarding = () => {
                 >
                   ⬅ Back
                 </motion.button>
-              ) : <div />}
+              ) : (
+                <div />
+              )}
               {step < 5 ? (
                 <motion.button
                   whileTap={{ scale: 0.95 }}

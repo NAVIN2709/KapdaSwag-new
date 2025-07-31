@@ -1,84 +1,67 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const mockFriends = [
-  // Users
-  {
-    id: 101,
-    type: "user",
-    username: "style_guru_ryan",
-    displayName: "Ryan Cooper",
-    avatar: "https://i.pravatar.cc/150?img=33",
-    bio: "Streetwear connoisseur. I live for kicks and custom fits.",
-  },
-  {
-    id: 102,
-    type: "user",
-    username: "boho_blossom",
-    displayName: "Ella Rose",
-    avatar: "https://i.pravatar.cc/150?img=45",
-    bio: "Boho babe with a love for earthy tones and layered textures.",
-  },
-  {
-    id: 103,
-    type: "user",
-    username: "sleek_and_chic",
-    displayName: "Nina Patel",
-    avatar: "https://i.pravatar.cc/150?img=55",
-    bio: "Minimalism is not boring. It’s an art form.",
-  },
-
-  // Brands
-  {
-    id: 201,
-    type: "brand",
-    username: "urbanthreadz",
-    displayName: "UrbanThreadz (Brand)",
-    avatar: "https://i.pravatar.cc/150?img=12",
-    bio: "Fresh streetwear drops weekly. DM for collabs!",
-  },
-  {
-    id: 202,
-    type: "brand",
-    username: "boho_earthwear",
-    displayName: "Boho Earthwear (Brand)",
-    avatar: "https://i.pravatar.cc/150?img=28",
-    bio: "Sustainable fashion for free spirits.",
-  },
-  {
-    id: 203,
-    type: "brand",
-    username: "minimaluxe",
-    displayName: "MinimaLuxe (Brand)",
-    avatar: "https://i.pravatar.cc/150?img=20",
-    bio: "Luxury in simplicity. Let your style breathe.",
-  },
-];
+import { getFriends } from "functions/Userfunctions"; // move your function here
+import { useAuth } from "../../../context/AuthContext"; // to get logged-in user
 
 const FriendsList = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [friends, setFriends] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const handleChat = (id) => {
     navigate(`/chats/${id}`);
   };
 
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (!user?.uid) return;
+      try {
+        const matched = await getFriends(user.uid);
+        setFriends(matched);
+      } catch (error) {
+        console.error("Error loading matched friends:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFriends();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="p-3 flex flex-col items-center text-gray-400">
+        <div className="w-6 h-6 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mb-2"></div>
+        Loading your Swag Circle...
+      </div>
+    );
+  }
+
+  if (friends.length === 0) {
+    return (
+      <div className="p-1 text-center text-gray-400">
+        No matched friends yet 😢
+      </div>
+    );
+  }
+
   return (
     <div className="p-1">
       <h2 className="text-lg font-bold mb-4 text-white">Your Swag Circle</h2>
       <ul className="space-y-4">
-        {mockFriends.map((friend) => (
+        {friends.map((friend) => (
           <li
             key={friend.id}
             className="flex items-center bg-white/5 p-3 rounded-xl backdrop-blur-md shadow-md"
           >
             <img
-              src={friend.avatar}
+              src={friend.profilePic}
               alt={friend.username}
               className="w-14 h-14 rounded-full object-cover border border-white mr-4"
             />
             <div className="flex-1">
-              <p className="text-base font-semibold text-white">
-                {friend.displayName}
+              <p className="text-base font-semibold text-white" onClick={()=>{navigate(`/profile/${friend.id}`)}}>
+                {friend.name || friend.displayName}
               </p>
               <p className="text-sm text-gray-300">@{friend.username}</p>
               <p className="text-xs text-gray-400 mt-1">{friend.bio}</p>

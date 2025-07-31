@@ -3,6 +3,7 @@ import Icon from "../../../components/AppIcon";
 import Image from "../../../components/AppImage";
 import Button from "../../../components/ui/Button";
 import { FaInstagram, FaSnapchatGhost } from "react-icons/fa";
+import { useAuth } from "context/AuthContext";
 
 const ProfileHeader = ({
   user,
@@ -12,6 +13,7 @@ const ProfileHeader = ({
   onMessage,
 }) => {
   const [isFriends, setIsFollowing] = useState(user.isFriends || false);
+  const { logout } = useAuth();
 
   const handleFollowClick = () => {
     setIsFollowing(!isFriends);
@@ -25,7 +27,7 @@ const ProfileHeader = ({
         <div className="relative">
           <div className="w-20 h-20 rounded-full overflow-hidden bg-muted">
             <Image
-              src={user.avatar}
+              src={user.profilePic}
               alt={user.username}
               className="w-full h-full object-cover"
             />
@@ -85,6 +87,17 @@ const ProfileHeader = ({
             Request
           </Button>
         )}
+        {/* Logout button */}
+        {isOwnProfile && (
+          <div className="flex justify-center">
+            <Button
+              onClick={logout}
+              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium"
+            >
+              Logout
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Bio */}
@@ -95,10 +108,10 @@ const ProfileHeader = ({
       )}
 
       {/* Style Tags */}
-      {user.styleTags && user.styleTags.length > 0 && (
+      {user.interests && user.interests.length > 0 && (
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
-            {user.styleTags.map((tag, index) => (
+            {user.interests.map((tag, index) => (
               <span
                 key={index}
                 className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full border border-primary/20"
@@ -135,52 +148,6 @@ const ProfileHeader = ({
                 <span className="text-sm">@{user.snapchat}</span>
               </a>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Drip Rating */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            <Icon name="Droplets" size={20} className="text-primary" />
-            <span className="text-sm text-muted-foreground">Drip Rating</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <span className="text-lg font-bold text-primary font-mono">
-              {user.dripRating}
-            </span>
-            <span className="text-sm text-muted-foreground">/100</span>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Icon name="TrendingUp" size={16} className="text-accent" />
-          <span className="text-sm text-muted-foreground">
-            Vibe: {user.vibeScore}
-          </span>
-        </div>
-      </div>
-
-      {/* Achievement Badges */}
-      {user.badges && user.badges.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-border">
-          <div className="flex items-center space-x-2 mb-2">
-            <Icon name="Award" size={16} className="text-warning" />
-            <span className="text-sm font-medium text-foreground">
-              Achievements
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {user.badges.map((badge, index) => (
-              <div
-                key={index}
-                className="flex items-center space-x-1 px-2 py-1 bg-warning/10 text-warning text-xs rounded-full border border-warning/20"
-              >
-                <Icon name={badge.icon} size={12} />
-                <span>{badge.name}</span>
-              </div>
-            ))}
           </div>
         </div>
       )}

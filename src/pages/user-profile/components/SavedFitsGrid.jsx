@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 const SavedFitsGrid = ({ products, onProductClick, onRemoveProduct }) => {
+  const navigate = useNavigate();
   const [removingId, setRemovingId] = useState(null);
 
   const handleRemove = async (productId, e) => {
@@ -27,7 +29,7 @@ const SavedFitsGrid = ({ products, onProductClick, onRemoveProduct }) => {
         <p className="text-muted-foreground text-center mb-6">
           Start swiping and save your favorite fashion finds to build your personal collection.
         </p>
-        <Button variant="default" iconName="Zap" iconPosition="left">
+        <Button variant="default" iconName="Zap" iconPosition="left" onClick={()=>navigate("/")}>
           Discover Fashion
         </Button>
       </div>
