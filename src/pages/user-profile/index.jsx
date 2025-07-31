@@ -9,6 +9,7 @@ import UserContentGrid from "./components/UserContentGrid";
 import EditProfileModal from "./components/EditProfileModal";
 import { useAuth } from "../../context/AuthContext"; // Auth context
 import { getUserData } from "functions/Userfunctions";
+import Loadingspinner from "components/ui/Loadingspinner";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -70,12 +71,7 @@ const UserProfile = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading profile...</p>
-        </div>
-      </div>
+      <Loadingspinner />
     );
   }
 
