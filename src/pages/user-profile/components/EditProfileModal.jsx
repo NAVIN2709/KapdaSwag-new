@@ -21,6 +21,16 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   const [newTag, setNewTag] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
+  const fashionTags = [
+    "Minimalistic",
+    "Old Money",
+    "Streetwear",
+    "Bohemian",
+    "Vintage",
+    "Casual",
+    "Chic",
+    "Sporty",
+  ];
 
   if (!isOpen) return null;
 
@@ -184,45 +194,35 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
             onChange={(e) => handleInputChange("snapchat", e.target.value)}
             placeholder="your_snapchat_username"
           />
-
           {/* Style Tags */}
           <div>
             <label className="block text-sm font-medium mb-2">Style Tags</label>
-            <div className="flex items-center gap-2 mb-3">
-              <input
-                type="text"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addStyleTag()}
-                placeholder="Add tag e.g. streetwear"
-                className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm text-foreground"
-              />
-              <Button
-                variant="outline"
-                onClick={addStyleTag}
-                disabled={!newTag.trim()}
-              >
-                Add
-              </Button>
-            </div>
-            {formData.interests.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {formData.interests.map((tag, idx) => (
-                  <div
+            <div className="flex flex-wrap gap-2">
+              {fashionTags.map((tag, idx) => {
+                const isSelected = formData.interests.includes(tag);
+                return (
+                  <button
                     key={idx}
-                    className="flex items-center space-x-2 px-3 py-1 rounded-full text-sm bg-primary/10 text-primary border border-primary/20"
+                    type="button"
+                    onClick={() => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        interests: isSelected
+                          ? prev.interests.filter((t) => t !== tag)
+                          : [...prev.interests, tag],
+                      }));
+                    }}
+                    className={`px-3 py-1 rounded-full border transition ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+                    }`}
                   >
-                    <span>#{tag}</span>
-                    <button
-                      onClick={() => removeStyleTag(tag)}
-                      className="hover:text-primary/70 transition"
-                    >
-                      <Icon name="X" size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                    #{tag}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

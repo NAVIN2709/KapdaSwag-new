@@ -13,7 +13,7 @@ const ChatScreen = () => {
   const { id: otherUserId } = useParams();
   const { user: authUser } = useAuth();
   const currentUserId = authUser?.uid;
-  const { messages, handleSend:handleSendMessage } = useChat({ currentUserId, otherUserId });
+  const { messages } = useChat({ currentUserId, otherUserId });
 
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [reaction, setReaction] = useState(null);
@@ -113,7 +113,7 @@ const user = {
       </div>
 
       {/* Message Input */}
-      <MessageInput onSend={handleSendMessage} />
+      <MessageInput currentUserId={currentUserId} otherUserId={otherUserId} />
 
       {/* Fullscreen image viewer */}
       <Dialog open={!!fullscreenImage} onClose={() => setFullscreenImage(null)}>

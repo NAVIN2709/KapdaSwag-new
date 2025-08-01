@@ -21,6 +21,7 @@ const UserProfile = () => {
   const [userContent, setUserContent] = useState([]);
   const [stylePreferences, setStylePreferences] = useState({});
   const [isOwnProfile] = useState(true);
+  const [showSpinner, setShowSpinner] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,6 +63,14 @@ const UserProfile = () => {
       console.error("Logout failed:", err);
     }
   };
+  useEffect(() => {
+    // Show spinner for at least 4 seconds
+    const timer = setTimeout(() => {
+      setShowSpinner(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const tabCounts = {
     saved: savedProducts.length,
@@ -69,10 +78,8 @@ const UserProfile = () => {
     preferences: Object.keys(stylePreferences).length,
   };
 
-  if (!user) {
-    return (
-      <Loadingspinner />
-    );
+  if (!user || showSpinner) {
+    return <Loadingspinner />;
   }
 
   const renderTabContent = () => {

@@ -7,34 +7,25 @@ import { db } from "../../../../firebase";
 import { sendFriendRequest } from "../../../functions/Userfunctions";
 import { useAuth } from "../../../context/AuthContext";
 
-const calculateMatchScore = (userA, userB) => {
-  if (!userA?.swipeData || !userB?.swipeData) return 0;
+const calculateInterestMatch = (userA, userB) => {
+  if (!userA?.interests || !userB?.interests) return 0;
 
-  let totalCategories = 0;
-  let commonLikes = 0;
+  const setA = new Set(userA.interests.map(i => i.toLowerCase()));
+  const setB = new Set(userB.interests.map(i => i.toLowerCase()));
 
-  for (const style in userA.swipeData) {
-    if (userB.swipeData[style]) {
-      totalCategories++;
-      const likesA = userA.swipeData[style]?.likes || 0;
-      const likesB = userB.swipeData[style]?.likes || 0;
-      commonLikes += Math.min(likesA, likesB);
-    }
-  }
+  const common = [...setA].filter(tag => setB.has(tag));
+  const totalUnique = new Set([...setA, ...setB]).size;
 
-  // Assuming maximum likes per category = 50
-  return totalCategories > 0
-    ? (commonLikes / (totalCategories * 50)) * 100
-    : 0;
+  return totalUnique > 0 ? (common.length / totalUnique) * 100 : 0;
 };
 
-// 🔹 Fetch suggestions based on match score
 const generateSuggestionsForUser = async (currentUser) => {
   const allUsersSnap = await getDocs(collection(db, "users"));
   const allUsers = allUsersSnap.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   }));
+
   const suggestions = [];
   const sentRequests = currentUser.sentRequests || [];
   const matchedFriends = currentUser.matched || [];
@@ -44,18 +35,17 @@ const generateSuggestionsForUser = async (currentUser) => {
       otherUser.id === currentUser.id ||
       sentRequests.includes(otherUser.id) ||
       matchedFriends.includes(otherUser.id)
-    )
-      continue;
+    ) continue;
 
-    const score = calculateMatchScore(currentUser, otherUser);
-    if (score > 65) {
+    const score = calculateInterestMatch(currentUser, otherUser);
+    if (score > 10) { // match threshold
       suggestions.push({
         id: otherUser.id,
         username: otherUser.username || "Unknown User",
         displayName: otherUser.name || "",
-        avatar:
-          otherUser.profilePic || "https://i.pravatar.cc/150?img=1",
+        avatar: otherUser.profilePic || "https://i.pravatar.cc/150?img=1",
         styleMatch: Math.round(score),
+        styleTags: otherUser.interests || [],
       });
     }
   }
@@ -67,15 +57,21 @@ const SuggestedUsers = ({ onUserClick }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [loadingStates, setLoadingStates] = useState({});
   const [followingStates, setFollowingStates] = useState({});
+  const [isLoading, setIsLoading] = useState(true); // 🔹 new loading state
 
   useEffect(() => {
     const loadSuggestions = async () => {
       if (!user?.uid) return;
+      setIsLoading(true);
       const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) return;
+      if (!userDoc.exists()) {
+        setIsLoading(false);
+        return;
+      }
       const currentUserData = { id: user.uid, ...userDoc.data() };
       const result = await generateSuggestionsForUser(currentUserData);
       setSuggestions(result);
+      setIsLoading(false);
     };
     loadSuggestions();
   }, [user]);
@@ -95,61 +91,92 @@ const SuggestedUsers = ({ onUserClick }) => {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-foreground">Suggested for You</h3>
-      <div className="grid gap-4">
-        {suggestions.map((user) => {
-          const isFriends = followingStates[user.id];
-          const isLoading = loadingStates[user.id];
 
-          return (
-            <div
-              key={user.id}
-              className="bg-card border border-border rounded-xl p-4 space-y-4 hover:border-primary/20"
-            >
-              <div className="flex items-start justify-between">
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+          <svg
+            className="animate-spin h-6 w-6 mb-2 text-primary"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            ></path>
+          </svg>
+          <p>Loading suggestions...</p>
+        </div>
+      ) : (
+        <div className="grid gap-4">
+          {suggestions.length === 0 ? (
+            <p className="text-muted-foreground text-sm">No suggestions found.</p>
+          ) : (
+            suggestions.map((user) => {
+              const isFriends = followingStates[user.id];
+              const isLoading = loadingStates[user.id];
+
+              return (
                 <div
-                  className="flex items-center space-x-3 cursor-pointer flex-1"
-                  onClick={() => onUserClick(user)}
+                  key={user.id}
+                  className="bg-card border border-border rounded-xl p-4 space-y-4 hover:border-primary/20"
                 >
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
-                    <Image
-                      src={user.avatar}
-                      alt={user.username}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="flex items-start justify-between">
+                    <div
+                      className="flex items-center space-x-3 cursor-pointer flex-1"
+                      onClick={() => onUserClick(user)}
+                    >
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
+                        <Image
+                          src={user.avatar}
+                          alt={user.username}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-foreground">
+                          @{user.username}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {user.displayName}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant={isFriends ? "outline" : "default"}
+                      size="sm"
+                      onClick={() => handleFollow(user.id)}
+                      disabled={isFriends}
+                      loading={isLoading}
+                    >
+                      {isFriends ? "Requested" : "Request"}
+                    </Button>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground">
-                      @{user.username}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      {user.displayName}
-                    </p>
+                  <div className="flex flex-wrap gap-1">
+                    {user.styleTags.map((tag, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
-                <Button
-                  variant={isFriends ? "outline" : "default"}
-                  size="sm"
-                  onClick={() => handleFollow(user.id)}
-                  disabled={isFriends}
-                  loading={isLoading}
-                >
-                  {isFriends ? "Requested" : "Request"}
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {user.styleTags.map((tag, i) => (
-                  <span
-                    key={i}
-                    className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })
+          )}
+        </div>
+      )}
     </div>
   );
 };

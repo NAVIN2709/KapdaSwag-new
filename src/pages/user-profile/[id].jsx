@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../firebase'; // adjust path
 import ProfileComponent from '../../components/ui/ProfileComponent';
+import Loadingspinner from 'components/ui/Loadingspinner';
 
 const Profile = () => {
   const { id } = useParams();
@@ -33,9 +34,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
-      </div>
+      <Loadingspinner />
     );
   }
 
