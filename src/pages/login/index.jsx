@@ -14,11 +14,27 @@ export default function Login() {
   const { loginWithGoogle, authLoading, user } = useAuth();
   const [currentVideo, setCurrentVideo] = useState(0);
 
-  useEffect(() => {
-    if (user) {
-      navigate("/");
+
+useEffect(() => {
+  const checkUser = async () => {
+    if (!user) return; // no user logged in, don't navigate
+
+    try {
+      const data = await getUserData(user.uid);
+
+      // Example: navigate only if profile is complete
+      if (data?.onboardingCompleted) {
+        navigate("/", { replace: true });
+      } else {
+        navigate("/onboarding", { replace: true });
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
-  }, [user]);
+  };
+
+  checkUser();
+}, [user]);
 
   useEffect(() => {
     const interval = setInterval(() => {

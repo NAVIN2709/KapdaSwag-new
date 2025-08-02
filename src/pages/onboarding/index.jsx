@@ -46,7 +46,8 @@ const Onboarding = () => {
     bio: "",
     snapchat: "",
     instagram: "",
-    tags: [],
+    interests: [],
+    name: "",
   });
 
   const handleNext = () => setStep((s) => Math.min(s + 1, 5));
@@ -75,12 +76,12 @@ const Onboarding = () => {
     reader.readAsDataURL(file);
   };
 
-  const toggleTag = (tag) =>
+  const toggleInterest = (tag) =>
     setFormData((fd) => ({
       ...fd,
-      tags: fd.tags.includes(tag)
-        ? fd.tags.filter((t) => t !== tag)
-        : [...fd.tags, tag],
+      interests: fd.interests.includes(tag)
+        ? fd.interests.filter((t) => t !== tag)
+        : [...fd.interests, tag],
     }));
 
   const handleSubmit = async () => {
@@ -140,8 +141,16 @@ const Onboarding = () => {
                   transition={{ duration: 0.5 }}
                 >
                   <h2 className="text-xl font-extrabold mb-4 text-center">
-                    Choose your username
+                    Tell us about you
                   </h2>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Full Name"
+                    className="w-full mb-3 p-3 rounded-full bg-white/20 border border-white/30 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  />
                   <input
                     type="text"
                     name="username"
@@ -312,6 +321,7 @@ const Onboarding = () => {
               )}
 
               {/* Step 5 */}
+              {/* Step 5 */}
               {step === 5 && (
                 <motion.div
                   key="5"
@@ -321,16 +331,16 @@ const Onboarding = () => {
                   transition={{ duration: 0.5 }}
                 >
                   <h2 className="text-2xl font-extrabold mb-4">
-                    🎯 Pick your fashion vibe
+                    🎯 Pick your fashion interests
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {fashionTags.map((tag) => (
                       <motion.button
                         key={tag}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => toggleTag(tag)}
+                        onClick={() => toggleInterest(tag)}
                         className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
-                          formData.tags.includes(tag)
+                          formData.interests.includes(tag)
                             ? "bg-gradient-to-r from-pink-500 to-purple-500 border-pink-300"
                             : "bg-white/20 border-white/30 hover:bg-white/30"
                         }`}
