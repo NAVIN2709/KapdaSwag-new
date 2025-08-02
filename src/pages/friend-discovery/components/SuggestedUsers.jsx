@@ -6,6 +6,7 @@ import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import { sendFriendRequest } from "../../../functions/Userfunctions";
 import { useAuth } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const calculateInterestMatch = (userA, userB) => {
   if (!userA?.interests || !userB?.interests) return 0;
@@ -43,7 +44,7 @@ const generateSuggestionsForUser = async (currentUser) => {
         id: otherUser.id,
         username: otherUser.username || "Unknown User",
         displayName: otherUser.name || "",
-        avatar: otherUser.profilePic || "https://i.pravatar.cc/150?img=1",
+        avatar: otherUser.profilePic || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
         styleMatch: Math.round(score),
         styleTags: otherUser.interests || [],
       });
@@ -52,7 +53,8 @@ const generateSuggestionsForUser = async (currentUser) => {
   return suggestions.sort((a, b) => b.styleMatch - a.styleMatch);
 };
 
-const SuggestedUsers = ({ onUserClick }) => {
+const SuggestedUsers = () => {
+  const navigate= useNavigate();
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState([]);
   const [loadingStates, setLoadingStates] = useState({});
@@ -87,6 +89,10 @@ const SuggestedUsers = ({ onUserClick }) => {
       setLoadingStates((prev) => ({ ...prev, [userId]: false }));
     }
   };
+  const onUserClick=(user)=>{
+    console.log(user.id)
+    navigate(`/profile/${user.id}`)
+  }
 
   return (
     <div className="space-y-4">

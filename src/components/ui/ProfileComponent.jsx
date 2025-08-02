@@ -94,7 +94,7 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
       {/* Avatar + Info */}
       <div className="text-center space-y-4">
         <img
-          src={profile.profilePic || "https://i.pravatar.cc/150?img=12"}
+          src={profile.profilePic || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0="}
           className="w-24 h-24 mx-auto rounded-full object-cover border-4 border-pink-500"
           alt="Profile"
         />
