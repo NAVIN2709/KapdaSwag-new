@@ -28,7 +28,6 @@ const UserProfile = () => {
       if (!authUser) return;
       try {
         const userData = await getUserData(authUser.uid);
-        console.log(userData)
         if (userData) {
           setUser(userData);
           setSavedProducts(userData.savedProducts || []);

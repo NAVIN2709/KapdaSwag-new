@@ -48,6 +48,7 @@ const Onboarding = () => {
     instagram: "",
     interests: [],
     name: "",
+    onboardingCompleted: true,
   });
 
   const handleNext = () => setStep((s) => Math.min(s + 1, 5));
