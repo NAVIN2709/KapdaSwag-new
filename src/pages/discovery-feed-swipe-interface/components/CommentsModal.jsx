@@ -28,6 +28,7 @@ const CommentsModal = ({ comments, onClose }) => {
           {comments?.video?.map((videoObj, index) => (
             <div key={index} className="mb-5">
               <p className="text-sm text-white/80 font-semibold mb-2">@{videoObj.username}</p>
+              <p className="text-md mb-2">{videoObj.textcomment}</p>
               <video
                 src={videoObj.videoUrl}
                 className="w-full h-[280px] object-cover rounded-xl shadow-md"

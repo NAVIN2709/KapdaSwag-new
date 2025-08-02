@@ -111,7 +111,7 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
             Edit Profile
           </button>
         ) : (
-          <button
+          <butto
             onClick={followState === "requested" ? undefined : handleFollow}
             disabled={followState === "requested"}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
@@ -127,7 +127,7 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
               : followState === "requested"
               ? "Requested"
               : "Unfollow"}
-          </button>
+          </butto>
         )}
       </div>
 

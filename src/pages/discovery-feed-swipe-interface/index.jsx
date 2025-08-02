@@ -51,6 +51,7 @@ const DiscoveryFeedSwipeInterface = () => {
             username: "nina",
             videoUrl:
               "https://media.gettyimages.com/id/1408879369/video/beautiful-african-american-woman-with-an-afro-sitting-alone-on-a-wicker-chair-and-feeling.mp4?s=mp4-640x640-gi&k=20&c=rXqz5kK2uAmDCTwqE-7Ov8rPsfvPFuqjJJPWJ1txJQ4=",
+            textcomment:"hi"
           },
           {
             username: "leo",
