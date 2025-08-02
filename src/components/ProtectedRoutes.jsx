@@ -68,24 +68,23 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  // 1. Not logged in → always go to /login
-  if (!user) {
+  switch (true) {
+  // Not logged in
+  case !user:
     return <Navigate to="/login" replace />;
-  }
 
-  // 2. Logged in but onboarding not completed → always go to /onboarding
-  if (!userdata?.onboardingCompleted && location.pathname !== '/onboarding') {
+  // Logged in but no user data → force to onboarding
+  case userdata && !userdata.onboardingCompleted && location.pathname !== '/onboarding':
     return <Navigate to="/onboarding" replace />;
-  }
 
-  // 3. Logged in and onboarding completed, but visiting /login or /onboarding → redirect to /
-  if (userdata?.onboardingCompleted && 
-      (location.pathname === '/login' || location.pathname === '/onboarding')) {
+  // Logged in and onboarding completed but visiting onboarding/login
+  case userdata?.onboardingCompleted &&
+       (location.pathname === '/onboarding' || location.pathname === '/login'):
     return <Navigate to="/" replace />;
-  }
 
-  // 4. Otherwise → allow access
-  return children;
+  default:
+    return children;
+}
 };
 
 export default ProtectedRoute;

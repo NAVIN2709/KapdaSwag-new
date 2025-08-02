@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiCamera } from "react-icons/fi";
 import { FaInstagram, FaSnapchat } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { saveUserData } from "functions/Userfunctions";
+import { getUserData, saveUserData } from "functions/Userfunctions";
 import { useAuth } from "../../context/AuthContext";
 
 const fashionTags = [
@@ -87,7 +87,13 @@ const Onboarding = () => {
 
   const handleSubmit = async () => {
     await saveUserData(user.uid, formData);
-    navigate("/");
+
+    // Fetch updated data
+    const updatedUser = await getUserData(user.uid);
+
+    if (updatedUser?.onboardingCompleted) {
+      navigate("/");
+    }
   };
 
   const progress = (step / 5) * 100;
