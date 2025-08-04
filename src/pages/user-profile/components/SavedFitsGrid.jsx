@@ -1,35 +1,110 @@
-import React, { useState } from 'react';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
-import Button from '../../../components/ui/Button';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import Icon from "../../../components/AppIcon";
+import Image from "../../../components/AppImage";
+import Button from "../../../components/ui/Button";
+import { useNavigate } from "react-router-dom";
+import { getProductData } from "functions/Userfunctions";
+import { handleUnsaveProduct } from "functions/Userfunctions";
+import { useAuth } from "context/AuthContext";
 
-const SavedFitsGrid = ({ products, onProductClick, onRemoveProduct }) => {
+const SavedFitsGrid = ({
+  products: productIds,
+  onProductClick,
+  onRemoveProduct,
+}) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [loadedProducts, setLoadedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState(null);
+
+  // Fetch all product details when IDs change
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const fetched = await Promise.all(
+          productIds.map(async (id) => {
+            const data = await getProductData(id);
+            return data ? { ...data, id } : null;
+          })
+        );
+        setLoadedProducts(fetched.filter(Boolean)); // remove nulls
+      } catch (err) {
+        console.error("❌ Error fetching saved products:", err);
+      }
+      setLoading(false);
+    };
+
+    if (productIds?.length) {
+      fetchProducts();
+    } else {
+      setLoadedProducts([]);
+      setLoading(false);
+    }
+  }, [productIds]);
+
+  const handleOpenProduct = async (product) => {
+    try {
+      const latestData = await getProductData(product.id);
+      if (latestData) {
+        onProductClick(latestData);
+      } else {
+        console.warn("⚠️ Product no longer exists");
+      }
+    } catch (err) {
+      console.error("❌ Error loading product:", err);
+    }
+  };
 
   const handleRemove = async (productId, e) => {
     e.stopPropagation();
     setRemovingId(productId);
-    
-    // Simulate API call
-    setTimeout(() => {
-      onRemoveProduct(productId);
-      setRemovingId(null);
-    }, 500);
+
+    // Optimistic UI update
+    setLoadedProducts((prev) => prev.filter((p) => p.id !== productId));
+    onRemoveProduct(productId);
+
+    try {
+      await handleUnsaveProduct(user.uid, productId); // Pass just the ID
+    } catch (err) {
+      console.error("❌ Error removing saved product:", err);
+    }
+
+    setRemovingId(null);
   };
 
-  if (products.length === 0) {
+  if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4">
+      <div className="flex justify-center py-16">
+        <Icon
+          name="Loader2"
+          size={24}
+          className="animate-spin text-muted-foreground"
+        />
+      </div>
+    );
+  }
+
+  if (loadedProducts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
         <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
           <Icon name="Bookmark" size={24} className="text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">No Saved Fits Yet</h3>
-        <p className="text-muted-foreground text-center mb-6">
-          Start swiping and save your favorite fashion finds to build your personal collection.
+        <h3 className="text-lg font-semibold text-foreground mb-2">
+          No Saved Fits Yet
+        </h3>
+        <p className="text-muted-foreground mb-6 max-w-xs">
+          Start swiping and save your favorite fashion finds to build your
+          personal collection.
         </p>
-        <Button variant="default" iconName="Zap" iconPosition="left" onClick={()=>navigate("/")}>
+        <Button
+          variant="default"
+          iconName="Zap"
+          iconPosition="left"
+          onClick={() => navigate("/")}
+        >
           Discover Fashion
         </Button>
       </div>
@@ -39,15 +114,13 @@ const SavedFitsGrid = ({ products, onProductClick, onRemoveProduct }) => {
   return (
     <div className="p-4">
       <div className="grid grid-cols-2 gap-4">
-        {products.map((product) => (
+        {loadedProducts.map((product) => (
           <div
             key={product.id}
-            onClick={() => onProductClick(product)}
-            className={`
-              relative bg-card rounded-xl overflow-hidden border border-border cursor-pointer
-              animation-spring hover:scale-[1.02] hover:shadow-lg
-              ${removingId === product.id ? 'opacity-50 scale-95' : ''}
-            `}
+            onClick={() => handleOpenProduct(product)}
+            className={`relative bg-card rounded-xl overflow-hidden border border-border cursor-pointer transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-lg ${
+              removingId === product.id ? "opacity-50 scale-95" : ""
+            }`}
           >
             {/* Product Image */}
             <div className="aspect-[3/4] bg-muted/20 relative overflow-hidden">
@@ -56,7 +129,7 @@ const SavedFitsGrid = ({ products, onProductClick, onRemoveProduct }) => {
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
-              
+
               {/* Remove Button */}
               <Button
                 variant="ghost"
@@ -74,7 +147,9 @@ const SavedFitsGrid = ({ products, onProductClick, onRemoveProduct }) => {
 
               {/* Price Badge */}
               <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-xs text-white px-2 py-1 rounded-lg">
-                <span className="text-sm font-semibold font-mono">${product.price}</span>
+                <span className="text-sm font-semibold font-mono">
+                  ${product.price}
+                </span>
               </div>
 
               {/* Like Count */}
@@ -92,27 +167,24 @@ const SavedFitsGrid = ({ products, onProductClick, onRemoveProduct }) => {
               <p className="text-muted-foreground text-xs mb-2 truncate">
                 {product.brand}
               </p>
-              
+
               {/* Saved Date */}
-              <div className="flex items-center space-x-1">
-                <Icon name="Clock" size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  Saved {product.savedDate}
-                </span>
-              </div>
+              {product.savedDate && (
+                <div className="flex items-center space-x-1">
+                  <Icon
+                    name="Clock"
+                    size={12}
+                    className="text-muted-foreground"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Saved {product.savedDate}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         ))}
       </div>
-
-      {/* Load More */}
-      {products.length >= 10 && (
-        <div className="flex justify-center mt-6">
-          <Button variant="outline" iconName="Plus" iconPosition="left">
-            Load More Fits
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

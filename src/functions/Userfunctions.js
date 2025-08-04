@@ -1,4 +1,4 @@
-import { doc, setDoc, updateDoc, getDoc,orderBy,query,collection,getDocs,increment } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, getDoc,query,collection,getDocs,increment, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../../firebase'; 
 
 // Function to save user data to the 'users' collection
@@ -167,3 +167,72 @@ export const handleSwipe = async (product) => {
   }
 };
 
+export const handleSave = async (userId, product) => {
+  if (!userId) {
+    console.error("❌ No user ID provided");
+    return;
+  }
+
+  try {
+    const userRef = doc(db, "users", userId);
+
+    // Save productId in savedProducts array
+    await updateDoc(userRef, {
+      savedProducts: arrayUnion(product.id) // store only the product ID for efficiency
+    });
+
+  } catch (error) {
+    console.error("❌ Error saving product:", error);
+  }
+};
+
+export const handleUnsave = async (userId, product) => {
+  if (!userId) return;
+
+  try {
+    const userRef = doc(db, "users", userId);
+
+    await updateDoc(userRef, {
+      savedProducts: arrayRemove(product.id)
+    });
+
+  } catch (error) {
+    console.error("❌ Error removing saved product:", error);
+  }
+};
+
+//Get Product Details
+export const getProductData = async (productId) => {
+  try {
+    if (!productId) throw new Error("❌ productId is required");
+
+    const productRef = doc(db, "products", productId);
+    const productSnap = await getDoc(productRef);
+
+    if (!productSnap.exists()) {
+      console.warn(`⚠️ Product not found: ${productId}`);
+      return null;
+    }
+
+    return { id: productSnap.id, ...productSnap.data() };
+  } catch (error) {
+    console.error("❌ Error fetching product data:", error);
+    return null;
+  }
+};
+
+// Remove product from profile grid
+export const handleUnsaveProduct = async (userId, productId) => {
+  if (!userId) return;
+
+  try {
+    const userRef = doc(db, "users", userId);
+
+    await updateDoc(userRef, {
+      savedProducts: arrayRemove(productId)
+    });
+
+  } catch (error) {
+    console.error("❌ Error removing saved product:", error);
+  }
+};

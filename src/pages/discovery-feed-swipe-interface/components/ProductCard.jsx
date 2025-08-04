@@ -9,9 +9,9 @@ import Icon from "../../../components/AppIcon";
 import Image from "../../../components/AppImage";
 import Button from "../../../components/ui/Button";
 import CommentsModal from "../components/CommentsModal";
-import { useNavigate } from "react-router-dom";
 import { getUserData } from "functions/Userfunctions";
 import { useAuth } from "../../../context/AuthContext"; // Auth context
+import { handleUnsave,handleSave } from "functions/Userfunctions";
 
 const ProductCard = ({
   product,
@@ -89,13 +89,20 @@ const ProductCard = ({
     setLastTap(now);
   };
 
-  const handleSave = () => {
-    setIsSaved((prev) => !prev);
-  };
+  const toggleSave = async () => {
+  if (!user?.uid) {
+    alert("Please log in to save products");
+    return;
+  }
 
-  const handleShopNow = (shop) => {
-    console.log("clicked");
-  };
+  if (isSaved) {
+    await handleUnsave(user.uid, product);
+  } else {
+    await handleSave(user.uid, product);
+  }
+
+  setIsSaved(prev => !prev);
+};
 
   useEffect(() => {
     controls.start({ x: 0, scale: 1 });
@@ -157,14 +164,12 @@ const ProductCard = ({
 
         {/* Quick Actions */}
         <div className="absolute right-6 bottom-[150px] transform -translate-y-1/2 space-y-3 space-x-2 z-50">
-          <Button
+           <Button
             variant="ghost"
             size="icon"
-            onClick={handleSave}
+            onClick={toggleSave}
             className={`w-12 h-12 rounded-full ${
-              isSaved
-                ? "bg-warning/90 text-white"
-                : "bg-black/40 text-white hover:bg-black/60"
+              isSaved ? "text-white bg-green" : "bg-black/40 text-white hover:bg-black/60"
             } backdrop-blur-xs`}
           >
             <Icon name={isSaved ? "Bookmark" : "BookmarkPlus"} size={20} />
