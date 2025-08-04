@@ -1,11 +1,19 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "../../../components/AppImage";
 import Icon from "../../../components/AppIcon";
 import Button from "../../../components/ui/Button";
+import { getUserData } from "functions/Userfunctions";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { db } from "../../../../firebase";
 
-const VideoReviewSection = ({ comments }) => {
-  const videoComments = comments?.video || [];
-  const textComments = comments?.text || [];
+const VideoReviewSection = ({ comments, currentUser,productId }) => {
+  const [CurrentUser, setCurrentUser] = useState(null);
+  const [videoComments, setVideoComments] = useState(comments?.video || []);
+  const [textComments, setTextComments] = useState(comments?.text || []);
+
+  const [textInput, setTextInput] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -14,6 +22,90 @@ const VideoReviewSection = ({ comments }) => {
   const videoRef = useRef(null);
 
   const currentVideo = videoComments[currentVideoIndex];
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const userdata = await getUserData(currentUser);
+        setCurrentUser(userdata);
+      } catch (error) {
+        console.error("❌ Error fetching user data:", error);
+      }
+    })();
+  }, []);
+
+  // Convert file to Base64
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const handleAddComment = async () => {
+    if (!textInput.trim() && !imageFile && !videoFile) return;
+    if (!CurrentUser?.username) {
+      alert("You must be logged in to comment");
+      return;
+    }
+
+    try {
+      const productRef = doc(db, "products", productId); // you'll need to pass productId as prop
+
+      if (videoFile) {
+        // Convert video to Base64
+        const videoBase64 = await toBase64(videoFile);
+
+        await updateDoc(productRef, {
+          "comments.video": arrayUnion({
+            username: CurrentUser.username,
+            videoUrl: videoBase64,
+            textcomment: textInput.trim() || "",
+          }),
+        });
+
+        setVideoComments((prev) => [
+          ...prev,
+          {
+            username: CurrentUser.username,
+            videoUrl: videoBase64,
+            textcomment: textInput.trim() || "",
+          },
+        ]);
+      } else {
+        // Image or text
+        let imageBase64 = null;
+        if (imageFile) {
+          imageBase64 = await toBase64(imageFile);
+        }
+
+        await updateDoc(productRef, {
+          "comments.text": arrayUnion({
+            username: CurrentUser.username,
+            comment: textInput.trim(),
+            ...(imageBase64 && { imageBase64 }),
+          }),
+        });
+
+        setTextComments((prev) => [
+          ...prev,
+          {
+            username: CurrentUser.username,
+            comment: textInput.trim(),
+            ...(imageBase64 && { imageBase64 }),
+          },
+        ]);
+      }
+
+      // Reset inputs
+      setTextInput("");
+      setImageFile(null);
+      setVideoFile(null);
+    } catch (error) {
+      console.error("❌ Error adding comment:", error);
+    }
+  };
 
   const handleVideoClick = (index) => {
     setCurrentVideoIndex(index);
@@ -49,6 +141,50 @@ const VideoReviewSection = ({ comments }) => {
         Comments ({textComments.length + videoComments.length})
       </h3>
 
+      {/* Add Comment Form */}
+      {/* Comment Input Bar */}
+      <div className="flex items-center bg-muted/20 rounded-full px-3 py-2 space-x-2">
+        {/* Attachment Button */}
+        <label className="cursor-pointer flex items-center justify-center w-8 h-8 rounded-full bg-muted hover:bg-muted/40 transition">
+          <Icon name="Paperclip" size={18} className="text-muted-foreground" />
+          <input
+            type="file"
+            accept="image/*,video/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              if (file.type.startsWith("image")) {
+                setImageFile(file);
+                setVideoFile(null);
+              } else if (file.type.startsWith("video")) {
+                setVideoFile(file);
+                setImageFile(null);
+              }
+            }}
+          />
+        </label>
+
+        {/* Text Input */}
+        <input
+          type="text"
+          placeholder="Write a comment..."
+          value={textInput}
+          onChange={(e) => setTextInput(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+        />
+
+        {/* Send Button */}
+        <Button
+          size="sm"
+          className="bg-primary text-white px-4 py-1 rounded-full hover:bg-primary/90 transition"
+          onClick={handleAddComment}
+          disabled={!textInput && !imageFile && !videoFile}
+        >
+          Send
+        </Button>
+      </div>
+
       {/* Video Comments Section */}
       {videoComments.length > 0 && (
         <>
@@ -61,7 +197,6 @@ const VideoReviewSection = ({ comments }) => {
               onLoadedMetadata={handleLoadedMetadata}
               className="w-full h-full object-cover"
             />
-            {/* Play Button Overlay */}
             <Button
               variant="ghost"
               size="icon"
@@ -81,7 +216,9 @@ const VideoReviewSection = ({ comments }) => {
                   <div
                     className="h-full bg-white transition-all duration-100"
                     style={{
-                      width: `${duration ? (currentTime / duration) * 100 : 0}%`,
+                      width: `${
+                        duration ? (currentTime / duration) * 100 : 0
+                      }%`,
                     }}
                   />
                 </div>

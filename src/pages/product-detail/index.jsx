@@ -14,7 +14,7 @@ import { useAuth } from "context/AuthContext";
 
 const ProductDetail = () => {
   const navigate = useNavigate();
-  const {user}=useAuth();
+  const { user } = useAuth();
   const { id } = useParams();
   const { state } = useLocation();
 
@@ -52,7 +52,7 @@ const ProductDetail = () => {
 
   const handleSaveToCloset = async (prod) => {
     try {
-      await handleSaveProduct(user.uid,prod); // call your imported function
+      await handleSaveProduct(user.uid, prod); // call your imported function
       console.log("Saved to closet:", prod);
     } catch (err) {
       console.error("Error saving product:", err);
@@ -187,7 +187,13 @@ const ProductDetail = () => {
                 </div>
               </div>
             )}
-            {activeSection === "reviews" && <VideoReviewSection comments={product.comments} />}
+            {activeSection === "reviews" && (
+              <VideoReviewSection
+                comments={product.comments}
+                currentUser={user.uid}
+                productId={product.id}
+              />
+            )}
           </div>
         </div>
       </div>
