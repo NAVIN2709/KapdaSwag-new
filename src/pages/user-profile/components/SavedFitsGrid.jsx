@@ -17,25 +17,30 @@ const SavedFitsGrid = ({
   const [loadedProducts, setLoadedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({
+    open: false,
+    productId: null,
+  });
 
-  // Fetch all product details when IDs change
+  // 🔹 Move fetchProducts OUTSIDE useEffect so it's reusable
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const fetched = await Promise.all(
+        productIds.map(async (id) => {
+          const data = await getProductData(id);
+          return data ? { ...data, id } : null;
+        })
+      );
+      setLoadedProducts(fetched.filter(Boolean));
+    } catch (err) {
+      console.error("❌ Error fetching saved products:", err);
+    }
+    setLoading(false);
+  };
+
+  // Fetch products when IDs change
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const fetched = await Promise.all(
-          productIds.map(async (id) => {
-            const data = await getProductData(id);
-            return data ? { ...data, id } : null;
-          })
-        );
-        setLoadedProducts(fetched.filter(Boolean)); // remove nulls
-      } catch (err) {
-        console.error("❌ Error fetching saved products:", err);
-      }
-      setLoading(false);
-    };
-
     if (productIds?.length) {
       fetchProducts();
     } else {
@@ -57,22 +62,30 @@ const SavedFitsGrid = ({
     }
   };
 
-  const handleRemove = async (productId, e) => {
-    e.stopPropagation();
-    setRemovingId(productId);
+const handleRemove = async (productId, e) => {
+  e.stopPropagation();
 
-    // Optimistic UI update
-    setLoadedProducts((prev) => prev.filter((p) => p.id !== productId));
-    onRemoveProduct(productId);
+  // 🚀 Optimistic UI update - remove from UI instantly
+  setLoadedProducts((prev) => prev.filter((p) => p.id !== productId));
+  onRemoveProduct(productId);
 
-    try {
-      await handleUnsaveProduct(user.uid, productId); // Pass just the ID
-    } catch (err) {
-      console.error("❌ Error removing saved product:", err);
-    }
+  // Show loading spinner while processing
+  setLoading(true);
 
-    setRemovingId(null);
-  };
+  try {
+    setTimeout(async () => {
+      // Call API to actually remove from backend
+      await handleUnsaveProduct(user.uid, productId);
+
+      // Fetch updated list from backend
+      await fetchProducts();
+    }, 2000); // 2 second delay
+  } catch (err) {
+    console.error("❌ Error removing saved product:", err);
+  }
+};
+
+
 
   if (loading) {
     return (
@@ -134,7 +147,10 @@ const SavedFitsGrid = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={(e) => handleRemove(product.id, e)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirmModal({ open: true, productId: product.id });
+                }}
                 disabled={removingId === product.id}
                 className="absolute top-2 right-2 bg-black/50 backdrop-blur-xs text-white hover:bg-black/70"
               >
@@ -185,6 +201,39 @@ const SavedFitsGrid = ({
           </div>
         ))}
       </div>
+      {confirmModal.open && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-card p-6 rounded-xl shadow-lg w-80">
+            <h2 className="text-lg font-semibold mb-3 text-black">
+              Remove Saved Product
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              Are you sure you want to remove this product from your saved fits?
+            </p>
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  setConfirmModal({ open: false, productId: null })
+                }
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={async () => {
+                  await handleRemove(confirmModal.productId, {
+                    stopPropagation: () => {},
+                  });
+                  setConfirmModal({ open: false, productId: null });
+                }}
+              >
+                Remove
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

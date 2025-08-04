@@ -148,7 +148,6 @@ export const getProducts = async () => {
 
 // Handle swipe right (increment likes in Firestore)
 export const handleSwipe = async (product) => {
-  console.log(product)
   try {
     if (!product?.id) {
       console.error("Product ID missing");

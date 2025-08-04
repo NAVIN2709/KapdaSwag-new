@@ -7,13 +7,13 @@ import ProfileTabs from "./components/ProfileTabs";
 import SavedFitsGrid from "./components/SavedFitsGrid";
 import UserContentGrid from "./components/UserContentGrid";
 import EditProfileModal from "./components/EditProfileModal";
-import { useAuth } from "../../context/AuthContext"; // Auth context
+import { useAuth } from "../../context/AuthContext"; 
 import { getUserData } from "functions/Userfunctions";
 import Loadingspinner from "components/ui/Loadingspinner";
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  const { user: authUser, logout } = useAuth(); // Get user + logout
+  const { user: authUser } = useAuth(); 
   const [activeTab, setActiveTab] = useState("saved");
   const [showEditModal, setShowEditModal] = useState(false);
   const [user, setUser] = useState(null);
@@ -51,18 +51,11 @@ const UserProfile = () => {
   const handleProductClick = (product) =>
     navigate("/product-detail", { state: { product } });
   const handleRemoveProduct = (productId) =>
-    setSavedProducts((prev) => prev.filter((p) => p.id !== productId));
+  setSavedProducts((prev) => prev.filter((id) => id !== productId));
+
   const handleContentClick = (content) =>
     console.log("Content clicked:", content);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/login"); // redirect to login page
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
   useEffect(() => {
     // Show spinner for at least 4 seconds
     const timer = setTimeout(() => {
