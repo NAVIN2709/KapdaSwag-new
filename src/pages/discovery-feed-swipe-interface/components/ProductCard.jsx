@@ -9,21 +9,36 @@ import Icon from "../../../components/AppIcon";
 import Image from "../../../components/AppImage";
 import Button from "../../../components/ui/Button";
 import CommentsModal from "../components/CommentsModal";
+import { useNavigate } from "react-router-dom";
+import { getUserData } from "functions/Userfunctions";
+import { useAuth } from "../../../context/AuthContext"; // Auth context
 
 const ProductCard = ({
   product,
   onSwipeLeft,
   onSwipeRight,
-  onDoubleTap,
   isActive = true,
   zIndex = 1,
 }) => {
   const [isLiked, setIsLiked] = useState(false);
+  const { user } = useAuth();
   const [isSaved, setIsSaved] = useState(false);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [lastTap, setLastTap] = useState(0);
+  const [CurrentUser, setCurrentUser] = useState(null)
   const [showComments, setShowComments] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState(null); // "left" or "right"
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const userdata = await getUserData(user.uid);
+        setCurrentUser(userdata);
+      } catch (error) {
+        console.error("❌ Error fetching user data:", error);
+      }
+    })();
+  }, []);
 
   const cardRef = useRef(null);
   const x = useMotionValue(0);
@@ -69,7 +84,6 @@ const ProductCard = ({
     if (delta < 300) {
       setIsLiked(true);
       setShowHeartAnimation(true);
-      onDoubleTap(product);
       setTimeout(() => setShowHeartAnimation(false), 1000);
     }
     setLastTap(now);
@@ -79,9 +93,10 @@ const ProductCard = ({
     setIsSaved((prev) => !prev);
   };
 
-  const handleShopNow = () => {
-    console.log("Shop now clicked");
+  const handleShopNow = (shop) => {
+    console.log("clicked");
   };
+
   useEffect(() => {
     controls.start({ x: 0, scale: 1 });
   }, []);
@@ -164,12 +179,14 @@ const ProductCard = ({
             <Icon name="MessageCircle" size={20} />
           </Button>
 
-          <Button
-            onClick={handleShopNow}
-            className="w-30 bg-primary text-white px-4 py-2 rounded-full text-sm font-semibold shadow backdrop-blur-xs"
+          <a
+            href={product?.shop}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-30 bg-primary text-white px-6 py-2 rounded-full text-md font-semibold shadow backdrop-blur-xs inline-block text-center"
           >
-            Shop Now
-          </Button>
+            Shop
+          </a>
         </div>
 
         {/* Info */}
@@ -275,6 +292,8 @@ const ProductCard = ({
         <CommentsModal
           comments={product.comments}
           onClose={() => setShowComments(false)}
+          currentUser={CurrentUser}
+          productId={product.id}
         />
       )}
     </motion.div>

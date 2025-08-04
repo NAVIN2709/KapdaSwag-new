@@ -31,12 +31,12 @@ const CategoryBrowse = () => {
 
   // Mock categories data
   const categories = [
-    { id: 'tops', name: 'Tops', icon: 'Shirt', count: 1247 },
-    { id: 'bottoms', name: 'Bottoms', icon: 'Zap', count: 892 },
-    { id: 'dresses', name: 'Dresses', icon: 'Heart', count: 634 },
-    { id: 'shoes', name: 'Shoes', icon: 'Footprints', count: 1156 },
-    { id: 'accessories', name: 'Accessories', icon: 'Watch', count: 743 },
-    { id: 'outerwear', name: 'Outerwear', icon: 'Coat', count: 421 }
+    { id: 'tops', name: 'Tops', icon: 'Shirt' },
+    { id: 'bottoms', name: 'Bottoms', icon: 'Zap' },
+    { id: 'dresses', name: 'Dresses', icon: 'Heart'},
+    { id: 'shoes', name: 'Shoes', icon: 'Footprints'},
+    { id: 'accessories', name: 'Accessories', icon: 'Watch' },
+    { id: 'outerwear', name: 'Outerwear', icon: 'Coat'}
   ];
 
   // Mock products data

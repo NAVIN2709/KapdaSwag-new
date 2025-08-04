@@ -1,4 +1,4 @@
-import { doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, getDoc,orderBy,query,collection,getDocs,increment } from 'firebase/firestore';
 import { db } from '../../firebase'; 
 
 // Function to save user data to the 'users' collection
@@ -127,3 +127,43 @@ export const sendFriendRequest = async (senderId, receiverId) => {
     throw error;
   }
 };
+
+// Get products from firestore
+export const getProducts = async () => {
+  try {
+    // You can order products by createdAt if needed
+    const q = query(collection(db, "products"));
+    const querySnapshot = await getDocs(q);
+
+    const products = querySnapshot.docs.map(doc => ({
+      id:doc.id,
+      ...doc.data()
+    }));
+    return products;
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+    return [];
+  }
+};
+
+// Handle swipe right (increment likes in Firestore)
+export const handleSwipe = async (product) => {
+  console.log(product)
+  try {
+    if (!product?.id) {
+      console.error("Product ID missing");
+      return;
+    }
+
+    // Firestore document reference
+    const productRef = doc(db, "products", product.id);
+
+    // Increment likes count by 1
+    await updateDoc(productRef, {
+      likes: increment(1)
+    });
+  } catch (error) {
+    console.error("❌ Error updating likes:", error);
+  }
+};
+
