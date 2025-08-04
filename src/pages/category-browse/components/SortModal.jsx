@@ -36,9 +36,9 @@ const SortModal = ({ isOpen, onClose, selectedSort, onSortChange }) => {
     },
     {
       id: 'boosts',
-      label: 'Most Boosted',
+      label: 'Most Liked',
       description: 'Community favorites',
-      icon: 'Zap'
+      icon: 'Heart'
     }
   ];
 

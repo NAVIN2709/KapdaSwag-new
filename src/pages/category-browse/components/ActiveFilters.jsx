@@ -6,7 +6,7 @@ const ActiveFilters = ({ filters, onRemoveFilter, onClearAll }) => {
   const getActiveFilters = () => {
     const active = [];
     
-    if (filters.priceRange) {
+    if (filters?.priceRange) {
       active.push({
         type: 'priceRange',
         label: filters.priceRange.label,
@@ -14,7 +14,7 @@ const ActiveFilters = ({ filters, onRemoveFilter, onClearAll }) => {
       });
     }
     
-    filters.brands.forEach(brand => {
+    filters?.brands.forEach(brand => {
       active.push({
         type: 'brands',
         label: brand,
@@ -22,7 +22,7 @@ const ActiveFilters = ({ filters, onRemoveFilter, onClearAll }) => {
       });
     });
     
-    filters.sizes.forEach(size => {
+    filters?.sizes.forEach(size => {
       active.push({
         type: 'sizes',
         label: size,
@@ -30,7 +30,7 @@ const ActiveFilters = ({ filters, onRemoveFilter, onClearAll }) => {
       });
     });
     
-    filters.colors.forEach(color => {
+    filters?.colors.forEach(color => {
       active.push({
         type: 'colors',
         label: color,
@@ -38,7 +38,7 @@ const ActiveFilters = ({ filters, onRemoveFilter, onClearAll }) => {
       });
     });
     
-    filters.styleTags.forEach(tag => {
+    filters?.styleTags.forEach(tag => {
       active.push({
         type: 'styleTags',
         label: tag,
@@ -46,7 +46,7 @@ const ActiveFilters = ({ filters, onRemoveFilter, onClearAll }) => {
       });
     });
     
-    if (filters.minRating > 0) {
+    if (filters?.minRating > 0) {
       active.push({
         type: 'minRating',
         label: `${filters.minRating}+ Stars`,

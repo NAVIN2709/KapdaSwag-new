@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
-
 import { Checkbox } from '../../../components/ui/Checkbox';
 
 const FilterPanel = ({ 
@@ -21,23 +20,7 @@ const FilterPanel = ({
     { id: 'over-200', label: 'Over $200', min: 200, max: 999999 }
   ];
 
-  const brands = [
-    'Nike', 'Adidas', 'Zara', 'H&M', 'Uniqlo', 'Forever 21', 
-    'Urban Outfitters', 'ASOS', 'Shein', 'Brandy Melville'
-  ];
-
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-
-  const colors = [
-    { name: 'Black', value: '#000000' },
-    { name: 'White', value: '#FFFFFF' },
-    { name: 'Red', value: '#EF4444' },
-    { name: 'Blue', value: '#3B82F6' },
-    { name: 'Green', value: '#10B981' },
-    { name: 'Pink', value: '#EC4899' },
-    { name: 'Purple', value: '#8B5CF6' },
-    { name: 'Yellow', value: '#F59E0B' }
-  ];
 
   const styleTags = [
     'Casual', 'Formal', 'Streetwear', 'Vintage', 'Minimalist',
@@ -52,9 +35,7 @@ const FilterPanel = ({
   const handleClearFilters = () => {
     const clearedFilters = {
       priceRange: null,
-      brands: [],
       sizes: [],
-      colors: [],
       styleTags: [],
       minRating: 0
     };
@@ -99,27 +80,6 @@ const FilterPanel = ({
         </div>
       </div>
 
-      {/* Brands */}
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Brands</h3>
-        <div className="space-y-2 max-h-40 overflow-y-auto">
-          {brands.map((brand) => (
-            <Checkbox
-              key={brand}
-              label={brand}
-              checked={localFilters.brands.includes(brand)}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  toggleArrayFilter('brands', brand);
-                } else {
-                  toggleArrayFilter('brands', brand);
-                }
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* Sizes */}
       <div>
         <h3 className="font-semibold text-foreground mb-3">Sizes</h3>
@@ -135,25 +95,6 @@ const FilterPanel = ({
             >
               {size}
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Colors */}
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Colors</h3>
-        <div className="flex flex-wrap gap-2">
-          {colors.map((color) => (
-            <button
-              key={color.name}
-              onClick={() => toggleArrayFilter('colors', color.name)}
-              className={`w-8 h-8 rounded-full border-2 animation-spring ${
-                localFilters.colors.includes(color.name)
-                  ? 'border-primary scale-110' :'border-border hover:border-muted-foreground'
-              }`}
-              style={{ backgroundColor: color.value }}
-              title={color.name}
-            />
           ))}
         </div>
       </div>

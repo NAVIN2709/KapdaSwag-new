@@ -47,26 +47,6 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                 {product.brand}
               </p>
             </div>
-            
-            <div className="flex items-center space-x-1 ml-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleLike}
-                className={`w-8 h-8 ${isLiked ? 'text-error' : 'text-muted-foreground'}`}
-              >
-                <Icon name="Heart" size={14} fill={isLiked ? 'currentColor' : 'none'} />
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSave}
-                className={`w-8 h-8 ${isSaved ? 'text-warning' : 'text-muted-foreground'}`}
-              >
-                <Icon name="Bookmark" size={14} fill={isSaved ? 'currentColor' : 'none'} />
-              </Button>
-            </div>
           </div>
           
           <div className="flex items-center justify-between">
@@ -78,10 +58,6 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
               <div className="flex items-center space-x-1">
                 <Icon name="Heart" size={12} className="text-error" />
                 <span className="font-mono">{product.likes}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Icon name="TrendingUp" size={12} className="text-accent" />
-                <span className="font-mono">{product.boosts}</span>
               </div>
             </div>
           </div>
@@ -156,10 +132,6 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
             <div className="flex items-center space-x-1">
               <Icon name="Heart" size={12} className="text-error" />
               <span className="font-mono">{product.likes}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Icon name="TrendingUp" size={12} className="text-accent" />
-              <span className="font-mono">{product.boosts}</span>
             </div>
           </div>
         </div>
