@@ -6,10 +6,11 @@ import { getUserData } from "functions/Userfunctions";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../../../../firebase";
 
-const VideoReviewSection = ({ comments, currentUser,productId }) => {
+const VideoReviewSection = ({ comments, currentUser, productId }) => {
   const [CurrentUser, setCurrentUser] = useState(null);
   const [videoComments, setVideoComments] = useState(comments?.video || []);
   const [textComments, setTextComments] = useState(comments?.text || []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [textInput, setTextInput] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -50,13 +51,12 @@ const VideoReviewSection = ({ comments, currentUser,productId }) => {
       return;
     }
 
+    setIsSubmitting(true); // start loading
     try {
-      const productRef = doc(db, "products", productId); // you'll need to pass productId as prop
+      const productRef = doc(db, "products", productId);
 
       if (videoFile) {
-        // Convert video to Base64
         const videoBase64 = await toBase64(videoFile);
-
         await updateDoc(productRef, {
           "comments.video": arrayUnion({
             username: CurrentUser.username,
@@ -64,7 +64,6 @@ const VideoReviewSection = ({ comments, currentUser,productId }) => {
             textcomment: textInput.trim() || "",
           }),
         });
-
         setVideoComments((prev) => [
           ...prev,
           {
@@ -74,12 +73,8 @@ const VideoReviewSection = ({ comments, currentUser,productId }) => {
           },
         ]);
       } else {
-        // Image or text
         let imageBase64 = null;
-        if (imageFile) {
-          imageBase64 = await toBase64(imageFile);
-        }
-
+        if (imageFile) imageBase64 = await toBase64(imageFile);
         await updateDoc(productRef, {
           "comments.text": arrayUnion({
             username: CurrentUser.username,
@@ -87,7 +82,6 @@ const VideoReviewSection = ({ comments, currentUser,productId }) => {
             ...(imageBase64 && { imageBase64 }),
           }),
         });
-
         setTextComments((prev) => [
           ...prev,
           {
@@ -98,13 +92,13 @@ const VideoReviewSection = ({ comments, currentUser,productId }) => {
         ]);
       }
 
-      // Reset inputs
       setTextInput("");
       setImageFile(null);
       setVideoFile(null);
     } catch (error) {
       console.error("❌ Error adding comment:", error);
     }
+    setIsSubmitting(false); // stop loading
   };
 
   const handleVideoClick = (index) => {
@@ -177,11 +171,34 @@ const VideoReviewSection = ({ comments, currentUser,productId }) => {
         {/* Send Button */}
         <Button
           size="sm"
-          className="bg-primary text-white px-4 py-1 rounded-full hover:bg-primary/90 transition"
+          className="bg-primary text-white px-4 py-1 rounded-full hover:bg-primary/90 transition flex items-center justify-center"
           onClick={handleAddComment}
-          disabled={!textInput && !imageFile && !videoFile}
+          disabled={(!textInput && !imageFile && !videoFile) || isSubmitting}
         >
-          Send
+          {isSubmitting ? (
+            <svg
+              className="animate-spin h-4 w-4 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              />
+            </svg>
+          ) : (
+            "Send"
+          )}
         </Button>
       </div>
 
@@ -201,9 +218,9 @@ const VideoReviewSection = ({ comments, currentUser,productId }) => {
               variant="ghost"
               size="icon"
               onClick={togglePlayPause}
-              className="absolute inset-0 w-full h-full backdrop-blur-xs text-white hover:bg-black/40 rounded-none"
+              className="absolute inset-0 w-full h-full bg-transparent text-white hover:bg-black/20 rounded-none"
             >
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-xs rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-black/40 rounded-full flex items-center justify-center">
                 <Icon name={isPlaying ? "Pause" : "Play"} size={24} />
               </div>
             </Button>
