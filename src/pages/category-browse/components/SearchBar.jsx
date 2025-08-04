@@ -73,7 +73,7 @@ const SearchBar = ({ onSearch, placeholder = "Search products..." }) => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={placeholder}
-              className="w-full pl-10 pr-10 py-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent animation-spring"
+              className="w-full pl-10 pr-10 py-3 bg-muted/30 border border-border rounded-xl text-black placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent animation-spring"
             />
             {query && (
               <Button

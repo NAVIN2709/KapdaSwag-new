@@ -32,14 +32,15 @@ const CategoryBrowse = () => {
   });
 
   const categories = [
-    { id: 'all', name: 'All', icon: 'Globe' },
-    { id: "tops", name: "Tops", icon: "Shirt" },
-    { id: "bottoms", name: "Bottoms", icon: "Zap" },
-    { id: "dresses", name: "Dresses", icon: "Heart" },
-    { id: "shoes", name: "Shoes", icon: "Footprints" },
-    { id: "accessories", name: "Accessories", icon: "Watch" },
-    { id: "outerwear", name: "Outerwear", icon: "Coat" },
-  ];
+  { id: "all", name: "All", icon: "Globe" },
+  { id: "streetwear", name: "Streetwear", icon: "Shirt" },
+  { id: "y2k", name: "Y2K Vibes", icon: "Sparkles" },
+  { id: "oversized", name: "Oversized Fits", icon: "Shirt" },
+  { id: "party", name: "Party Fits", icon: "GlassCheers" },
+  { id: "cozy", name: "Cozy Wear", icon: "Coffee" },
+  { id: "sneakers", name: "Sneakers", icon: "Footprints" },
+  { id: "accessories", name: "Accessories", icon: "Watch" },
+];
 
   // 🔹 Fetch products from Firestore/API
 const fetchProducts = useCallback(async () => {
@@ -101,8 +102,6 @@ const fetchProducts = useCallback(async () => {
     if (filters.minRating > 0) {
       filtered = filtered.filter((p) => p.rating >= filters.minRating);
     }
-
-
 
     // Sorting
     switch (selectedSort) {

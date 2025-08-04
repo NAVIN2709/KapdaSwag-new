@@ -100,7 +100,7 @@ const Routes = () => {
                 }
               />
               <Route
-                path="/product-detail"
+                path="/product-detail/:id"
                 element={
                   <ProtectedRoute>
                     <ProductDetail />

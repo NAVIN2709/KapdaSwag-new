@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
-import Button from '../../../components/ui/Button';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import Icon from "../../../components/AppIcon";
+import Image from "../../../components/AppImage";
+import Button from "../../../components/ui/Button";
+import { useNavigate } from "react-router-dom";
 
-const ProductCard = ({ product, viewMode = 'grid' }) => {
+const ProductCard = ({ product, viewMode = "grid" }) => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(product.isLiked || false);
   const [isSaved, setIsSaved] = useState(product.isSaved || false);
@@ -20,13 +20,13 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
   };
 
   const handleCardClick = () => {
-    navigate('/product-detail', { state: { product } });
+    navigate(`/product-detail/${product.id}`, { state: { product } });
   };
 
-  if (viewMode === 'list') {
+  if (viewMode === "list") {
     return (
-      <div 
-        onClick={handleCardClick}
+      <div
+        onClick={() => handleCardClick(product)}
         className="flex space-x-3 p-3 bg-card/50 rounded-xl border border-border/50 hover:border-border animation-spring cursor-pointer"
       >
         <div className="w-20 h-20 bg-muted/20 rounded-lg overflow-hidden flex-shrink-0">
@@ -36,7 +36,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
             className="w-full h-full object-cover"
           />
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-1">
             <div className="flex-1 min-w-0">
@@ -48,12 +48,12 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <span className="font-bold text-foreground font-mono">
               ${product.price}
             </span>
-            
+
             <div className="flex items-center space-x-3 text-xs text-muted-foreground">
               <div className="flex items-center space-x-1">
                 <Icon name="Heart" size={12} className="text-error" />
@@ -67,8 +67,8 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
   }
 
   return (
-    <div 
-      onClick={handleCardClick}
+    <div
+      onClick={() => handleCardClick(product)}
       className="bg-card/50 rounded-xl border border-border/50 hover:border-border animation-spring cursor-pointer group overflow-hidden"
     >
       {/* Image Container */}
@@ -78,7 +78,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 animation-spring"
         />
-        
+
         {/* Quick Actions */}
         <div className="absolute top-2 right-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 animation-spring">
           <Button
@@ -86,21 +86,33 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
             size="icon"
             onClick={handleLike}
             className={`w-8 h-8 bg-background/80 backdrop-blur-xs ${
-              isLiked ? 'text-error' : 'text-muted-foreground hover:text-foreground'
+              isLiked
+                ? "text-error"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Icon name="Heart" size={16} fill={isLiked ? 'currentColor' : 'none'} />
+            <Icon
+              name="Heart"
+              size={16}
+              fill={isLiked ? "currentColor" : "none"}
+            />
           </Button>
-          
+
           <Button
             variant="ghost"
             size="icon"
             onClick={handleSave}
             className={`w-8 h-8 bg-background/80 backdrop-blur-xs ${
-              isSaved ? 'text-warning' : 'text-muted-foreground hover:text-foreground'
+              isSaved
+                ? "text-warning"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Icon name="Bookmark" size={16} fill={isSaved ? 'currentColor' : 'none'} />
+            <Icon
+              name="Bookmark"
+              size={16}
+              fill={isSaved ? "currentColor" : "none"}
+            />
           </Button>
         </div>
 
@@ -111,7 +123,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
           </div>
         )}
       </div>
-      
+
       {/* Product Info */}
       <div className="p-3">
         <div className="mb-2">
@@ -122,12 +134,12 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
             {product.brand}
           </p>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <span className="font-bold text-foreground font-mono">
             ${product.price}
           </span>
-          
+
           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
             <div className="flex items-center space-x-1">
               <Icon name="Heart" size={12} className="text-error" />

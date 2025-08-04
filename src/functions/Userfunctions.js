@@ -235,3 +235,23 @@ export const handleUnsaveProduct = async (userId, productId) => {
     console.error("❌ Error removing saved product:", error);
   }
 };
+
+//Save a product to closet
+export const handleSaveProduct = async (userId, productId) => {
+  if (!userId) {
+    console.error("❌ No user ID provided");
+    return;
+  }
+
+  try {
+    const userRef = doc(db, "users", userId);
+
+    // Save productId in savedProducts array
+    await updateDoc(userRef, {
+      savedProducts: arrayUnion(productId) // store only the product ID for efficiency
+    });
+
+  } catch (error) {
+    console.error("❌ Error saving product:", error);
+  }
+};

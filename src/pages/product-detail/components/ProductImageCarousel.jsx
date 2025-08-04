@@ -1,36 +1,41 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import Image from '../../../components/AppImage';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
 const ProductImageCarousel = ({ images, productName, onLike, isLiked }) => {
+  // Normalize to always be an array
+  const imageList = Array.isArray(images) ? images : [images];
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+
   const imageRef = useRef(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
   const touchEndRef = useRef({ x: 0, y: 0 });
 
+  // Swipe Handling
   const handleTouchStart = (e) => {
     touchStartRef.current = {
       x: e.touches[0].clientX,
-      y: e.touches[0].clientY
+      y: e.touches[0].clientY,
     };
   };
 
   const handleTouchMove = (e) => {
     touchEndRef.current = {
       x: e.touches[0].clientX,
-      y: e.touches[0].clientY
+      y: e.touches[0].clientY,
     };
   };
 
   const handleTouchEnd = () => {
     const deltaX = touchStartRef.current.x - touchEndRef.current.x;
     const deltaY = Math.abs(touchStartRef.current.y - touchEndRef.current.y);
-    
-    if (Math.abs(deltaX) > 50 && deltaY < 100) {
-      if (deltaX > 0 && currentIndex < images.length - 1) {
+
+    if (Math.abs(deltaX) > 50 && deltaY < 100 && imageList.length > 1) {
+      if (deltaX > 0 && currentIndex < imageList.length - 1) {
         setCurrentIndex(currentIndex + 1);
       } else if (deltaX < 0 && currentIndex > 0) {
         setCurrentIndex(currentIndex - 1);
@@ -38,6 +43,7 @@ const ProductImageCarousel = ({ images, productName, onLike, isLiked }) => {
     }
   };
 
+  // Zoom Handling
   const handleDoubleClick = (e) => {
     if (isZoomed) {
       setIsZoomed(false);
@@ -50,12 +56,13 @@ const ProductImageCarousel = ({ images, productName, onLike, isLiked }) => {
     }
   };
 
+  // Navigation
   const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
+    setCurrentIndex((prev) => (prev + 1) % imageList.length);
   };
 
   const prevImage = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    setCurrentIndex((prev) => (prev - 1 + imageList.length) % imageList.length);
   };
 
   return (
@@ -68,9 +75,7 @@ const ProductImageCarousel = ({ images, productName, onLike, isLiked }) => {
         }`}
         style={
           isZoomed
-            ? {
-                transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`
-              }
+            ? { transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%` }
             : {}
         }
         onDoubleClick={handleDoubleClick}
@@ -79,20 +84,20 @@ const ProductImageCarousel = ({ images, productName, onLike, isLiked }) => {
         onTouchEnd={handleTouchEnd}
       >
         <Image
-          src={images[currentIndex]}
+          src={imageList[currentIndex]}
           alt={`${productName} - Image ${currentIndex + 1}`}
           className="w-full h-full object-cover"
         />
       </div>
 
-      {/* Navigation Arrows - Desktop */}
-      {images.length > 1 && (
+      {/* Navigation Arrows (Only if multiple images) */}
+      {imageList.length > 1 && (
         <>
           <Button
             variant="ghost"
             size="icon"
             onClick={prevImage}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/20 backdrop-blur-xs text-white hover:bg-black/40 hidden md:flex"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/20 backdrop-blur-xs text-black hover:bg-black/40 hidden md:flex"
             style={{ width: '44px', height: '44px' }}
           >
             <Icon name="ChevronLeft" size={24} />
@@ -101,7 +106,7 @@ const ProductImageCarousel = ({ images, productName, onLike, isLiked }) => {
             variant="ghost"
             size="icon"
             onClick={nextImage}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/20 backdrop-blur-xs text-white hover:bg-black/40 hidden md:flex"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/20 backdrop-blur-xs text-black hover:bg-black/40 hidden md:flex"
             style={{ width: '44px', height: '44px' }}
           >
             <Icon name="ChevronRight" size={24} />
@@ -115,15 +120,16 @@ const ProductImageCarousel = ({ images, productName, onLike, isLiked }) => {
         size="icon"
         onClick={onLike}
         className={`absolute top-4 right-4 ${
-          isLiked 
-            ? 'text-error bg-background/80 backdrop-blur-xs' :'text-white bg-black/20 backdrop-blur-xs hover:bg-black/40'
+          isLiked
+            ? 'text-error bg-background/80 backdrop-blur-xs'
+            : 'text-white bg-black/20 backdrop-blur-xs hover:bg-black/40'
         }`}
         style={{ width: '44px', height: '44px' }}
       >
-        <Icon 
-          name="Heart" 
-          size={20} 
-          fill={isLiked ? 'currentColor' : 'none'} 
+        <Icon
+          name="Heart"
+          size={20}
+          fill={isLiked ? 'currentColor' : 'none'}
         />
       </Button>
 
@@ -135,25 +141,26 @@ const ProductImageCarousel = ({ images, productName, onLike, isLiked }) => {
       )}
 
       {/* Image Indicators */}
-      {images.length > 1 && (
+      {imageList.length > 1 && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {images.map((_, index) => (
+          {imageList.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                index === currentIndex ? 'bg-white scale-125' : 'bg-white/50'
+                index === currentIndex
+                  ? 'bg-white scale-125'
+                  : 'bg-white/50'
               }`}
-              style={{ minWidth: '8px', minHeight: '8px' }}
             />
           ))}
         </div>
       )}
 
       {/* Image Counter */}
-      {images.length > 1 && (
-        <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-xs text-white px-3 py-1 rounded-full text-sm font-medium">
-          {currentIndex + 1} / {images.length}
+      {imageList.length > 1 && (
+        <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-xs text-white px-3 py-1 rounded-full text-sm font-medium">
+          {currentIndex + 1} / {imageList.length}
         </div>
       )}
     </div>
