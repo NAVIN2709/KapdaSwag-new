@@ -62,6 +62,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             username: CurrentUser.username,
             videoUrl: videoBase64,
             textcomment: textInput.trim() || "",
+            userId:currentUser
           }),
         });
         setVideoComments((prev) => [
@@ -70,6 +71,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             username: CurrentUser.username,
             videoUrl: videoBase64,
             textcomment: textInput.trim() || "",
+             userId:currentUser
           },
         ]);
       } else {
@@ -80,6 +82,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             username: CurrentUser.username,
             comment: textInput.trim(),
             ...(imageBase64 && { imageBase64 }),
+             userId:currentUser
           }),
         });
         setTextComments((prev) => [
@@ -88,6 +91,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             username: CurrentUser.username,
             comment: textInput.trim(),
             ...(imageBase64 && { imageBase64 }),
+             userId:currentUser
           },
         ]);
       }

@@ -2,8 +2,10 @@ import React, { useState, useRef } from "react";
 import Icon from "../../../components/AppIcon";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../../../../firebase";
+import { useAuth } from "context/AuthContext";
 
 const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
+  const { user } = useAuth();
   const [newComment, setNewComment] = useState("");
   const [mediaFile, setMediaFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +46,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
               username: currentUser.username,
               videoUrl: base64String,
               textcomment: newComment.trim() || "",
+              userId: user.uid,
             }),
           });
           comments.video = [
@@ -52,6 +55,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
               username: currentUser.username,
               videoUrl: base64String,
               textcomment: newComment.trim() || "",
+              userId: user.uid,
             },
           ];
         } else {
@@ -60,6 +64,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
               username: currentUser.username,
               comment: newComment.trim(),
               imageBase64: base64String,
+              userId: user.uid,
             }),
           });
           comments.text = [
@@ -68,6 +73,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
               username: currentUser.username,
               comment: newComment.trim(),
               imageBase64: base64String,
+              userId: user.uid,
             },
           ];
         }
@@ -76,14 +82,18 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
           "comments.text": arrayUnion({
             username: currentUser.username,
             comment: newComment.trim(),
+            userId: user.uid,
           }),
         });
         comments.text = [
           ...(comments.text || []),
-          { username: currentUser.username, comment: newComment.trim() },
+          {
+            username: currentUser.username,
+            comment: newComment.trim(),
+            userId: user.uid,
+          },
         ];
       }
-
       setNewComment("");
       setMediaFile(null);
     } catch (error) {
@@ -95,7 +105,6 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md">
       <div className="bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/20 shadow-2xl w-full max-w-lg max-h-[85%] flex flex-col overflow-hidden">
-        
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-white/20 sticky top-0 bg-white/10 backdrop-blur-lg z-10">
           <h3 className="text-xl font-bold text-white tracking-wide">
@@ -137,7 +146,9 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
             >
               <p className="text-xs text-white/60 mb-1">@{videoObj.username}</p>
               {videoObj.textcomment && (
-                <p className="text-white text-sm mb-2">{videoObj.textcomment}</p>
+                <p className="text-white text-sm mb-2">
+                  {videoObj.textcomment}
+                </p>
               )}
               <video
                 src={videoObj.videoUrl}

@@ -6,8 +6,6 @@ import { Import } from "lucide-react";
 import LeaderBoardModal from "./LeaderBoardModal";
 
 const Header = () => {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
   const data = [
@@ -99,15 +97,6 @@ const Header = () => {
 
           {/* Right Actions */}
           <div className="flex items-center space-x-2">
-            {/* Search Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSearchToggle}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Icon name="Search" size={20} />
-            </Button>
             {/* Leaderboard Button */}
             <Button
               variant="ghost"
@@ -131,85 +120,6 @@ const Header = () => {
           </div>
         </div>
       </header>
-
-      {/* Search Overlay */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-150 bg-background/80 backdrop-blur-sm animate-fade-in">
-          <div className="absolute top-0 left-0 right-0 bg-background border-b border-border safe-area-inset-top animate-slide-up">
-            <div className="flex items-center h-16 px-4">
-              <form
-                onSubmit={handleSearchSubmit}
-                className="flex-1 flex items-center space-x-3"
-              >
-                <Icon
-                  name="Search"
-                  size={20}
-                  className="text-muted-foreground"
-                />
-                <input
-                  type="text"
-                  placeholder="Search products, brands, or styles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 bg-transparent text-foreground placeholder-muted-foreground outline-none text-base"
-                  autoFocus
-                />
-                {searchQuery && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSearchQuery("")}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <Icon name="X" size={16} />
-                  </Button>
-                )}
-              </form>
-              <Button
-                variant="ghost"
-                onClick={handleSearchToggle}
-                className="ml-2 text-muted-foreground hover:text-foreground"
-              >
-                Cancel
-              </Button>
-            </div>
-
-            {/* Suggestions */}
-            {searchQuery && (
-              <div className="px-4 pb-4">
-                <div className="space-y-2">
-                  <div className="text-sm text-muted-foreground mb-2">
-                    Popular searches
-                  </div>
-                  {[
-                    "Vintage denim",
-                    "Summer dresses",
-                    "Sneakers",
-                    "Accessories",
-                  ].map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => {
-                        setSearchQuery(suggestion);
-                        handleSearchSubmit({ preventDefault: () => {} });
-                      }}
-                      className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-muted/50 text-left animation-spring"
-                    >
-                      <Icon
-                        name="TrendingUp"
-                        size={16}
-                        className="text-muted-foreground"
-                      />
-                      <span className="text-foreground">{suggestion}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Notifications Modal */}
       {isNotificationsOpen && (
