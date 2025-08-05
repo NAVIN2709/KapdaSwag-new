@@ -7,15 +7,17 @@ import ProfileTabs from "./components/ProfileTabs";
 import SavedFitsGrid from "./components/SavedFitsGrid";
 import UserContentGrid from "./components/UserContentGrid";
 import EditProfileModal from "./components/EditProfileModal";
-import { useAuth } from "../../context/AuthContext"; 
+import { useAuth } from "../../context/AuthContext";
 import { getUserData } from "functions/Userfunctions";
 import Loadingspinner from "components/ui/Loadingspinner";
+import NewPost from "./components/NewPost";
 
 const UserProfile = () => {
   const navigate = useNavigate();
-  const { user: authUser } = useAuth(); 
+  const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState("saved");
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showNewPostModal, setShowNewPostModal] = useState(false);
   const [user, setUser] = useState(null);
   const [savedProducts, setSavedProducts] = useState([]);
   const [userContent, setUserContent] = useState([]);
@@ -44,6 +46,7 @@ const UserProfile = () => {
   const handleEditProfile = () => setShowEditModal(true);
   const handleSaveProfile = (updatedData) =>
     setUser((prev) => ({ ...prev, ...updatedData }));
+
   const handleFollow = (isFollowing) =>
     console.log("Follow action:", isFollowing);
   const handleMessage = () => console.log("Message user");
@@ -51,17 +54,13 @@ const UserProfile = () => {
   const handleProductClick = (product) =>
     navigate("/product-detail", { state: { product } });
   const handleRemoveProduct = (productId) =>
-  setSavedProducts((prev) => prev.filter((id) => id !== productId));
+    setSavedProducts((prev) => prev.filter((id) => id !== productId));
 
   const handleContentClick = (content) =>
     console.log("Content clicked:", content);
 
   useEffect(() => {
-    // Show spinner for at least 4 seconds
-    const timer = setTimeout(() => {
-      setShowSpinner(false);
-    }, 3000);
-
+    const timer = setTimeout(() => setShowSpinner(false), 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -98,7 +97,7 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <Header />
 
       <main className="pt-16 pb-20">
@@ -121,12 +120,38 @@ const UserProfile = () => {
 
       <BottomNavigation />
 
+      {/* Floating + Button for Brand */}
+      {user?.isBrand && (
+        <button
+          onClick={() => setShowNewPostModal(true)}
+          className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-lg hover:bg-primary/90 transition text-2xl"
+        >
+          +
+        </button>
+      )}
+
+      {/* Edit Profile Modal */}
       <EditProfileModal
         isOpen={showEditModal}
         onClose={() => setShowEditModal(false)}
         user={user}
         onSave={handleSaveProfile}
       />
+
+      {/* New Post Modal */}
+      {showNewPostModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-4 w-full max-w-2xl relative">
+            <button
+              onClick={() => setShowNewPostModal(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black"
+            >
+              ✕
+            </button>
+            <NewPost onClose={() => setShowNewPostModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

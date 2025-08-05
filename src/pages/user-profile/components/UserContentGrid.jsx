@@ -110,10 +110,10 @@ const UserContentGrid = ({ onContentClick }) => {
           <Icon name="Camera" size={24} className="text-muted-foreground" />
         </div>
         <h3 className="text-lg font-semibold text-foreground mb-2">
-          No Media Comments Yet
+          No Posts
         </h3>
         <p className="text-muted-foreground text-center mb-6">
-          You haven't posted any image or video comments yet.
+          You haven't posted anything yet.
         </p>
       </div>
     );

@@ -3,24 +3,26 @@ import Icon from "../../../components/AppIcon";
 import Image from "../../../components/AppImage";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
-import { saveUserData } from "functions/Userfunctions"; // <-- Import Firestore function
-import { useAuth } from "../../../context/AuthContext"; // <-- To get logged-in user
+import { saveUserData } from "functions/Userfunctions";
+import { useAuth } from "../../../context/AuthContext";
 
 const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
-  const { user: authUser } = useAuth(); // current logged in user
+  const { user: authUser } = useAuth();
   const [formData, setFormData] = useState({
     name: user?.name || "",
     username: user?.username || "",
     bio: user?.bio || "",
     location: user?.location || "",
     interests: user?.interests || [],
-    profilePic: user?.avatar || "",
+    profilePic: user?.profilePic || "",
     instagram: user?.instagram || "",
     snapchat: user?.snapchat || "",
+    isBrand: user?.isBrand || false,
   });
   const [newTag, setNewTag] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
+
   const fashionTags = [
     "Minimalistic",
     "Old Money",
@@ -53,22 +55,14 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     }
   };
 
-  const addStyleTag = () => {
-    const trimmed = newTag.trim();
-    if (trimmed && !formData.interests.includes(trimmed)) {
-      setFormData((prev) => ({
-        ...prev,
-        interests: [...prev.interests, trimmed],
-      }));
-      setNewTag("");
+  const toggleBrandAccount = () => {
+    const newValue = !formData.isBrand;
+    const confirmMsg = newValue
+      ? "Are you sure you want to switch to a Brand Account? This will mark your account as a brand."
+      : "Are you sure you want to switch back to a Personal Account?";
+    if (window.confirm(confirmMsg)) {
+      setFormData((prev) => ({ ...prev, isBrand: newValue }));
     }
-  };
-
-  const removeStyleTag = (tagToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      interests: prev.interests.filter((tag) => tag !== tagToRemove),
-    }));
   };
 
   const handleSave = async () => {
@@ -79,8 +73,8 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
 
     setIsLoading(true);
     try {
-      await saveUserData(authUser.uid, formData); // Save to Firestore
-      if (onSave) onSave(formData); // Optional: update UI without refetch
+      await saveUserData(authUser.uid, formData);
+      if (onSave) onSave(formData);
       onClose();
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -144,6 +138,28 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
             </Button>
           </div>
 
+          {/* Brand Account Toggle */}
+          <div className="flex items-center justify-between bg-muted/20 p-3 rounded-lg">
+            <span className="text-foreground font-medium">
+              Switch to Creator
+            </span>
+            <label className="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isBrand}
+                onChange={toggleBrandAccount}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-300 peer-checked:bg-primary rounded-full relative transition-colors">
+                <div
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    formData.isBrand ? "translate-x-5" : ""
+                  }`}
+                ></div>
+              </div>
+            </label>
+          </div>
+
           {/* Form Fields */}
           <div className="space-y-5">
             <Input
@@ -181,19 +197,20 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
               placeholder="City, Country"
             />
           </div>
+
           <Input
             label="Instagram"
             value={formData.instagram}
             onChange={(e) => handleInputChange("instagram", e.target.value)}
             placeholder="your_instagram_handle"
           />
-
           <Input
             label="Snapchat"
             value={formData.snapchat}
             onChange={(e) => handleInputChange("snapchat", e.target.value)}
             placeholder="your_snapchat_username"
           />
+
           {/* Style Tags */}
           <div>
             <label className="block text-sm font-medium mb-2">Style Tags</label>
