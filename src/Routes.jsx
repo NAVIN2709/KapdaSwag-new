@@ -6,7 +6,7 @@ import ErrorBoundary from "components/ErrorBoundary";
 // Components
 import ProtectedRoute from "./components/ProtectedRoutes";
 import { AuthProvider } from "./context/AuthContext";
-import  Loadingspinner  from "./components/ui/Loadingspinner";
+import Loadingspinner from "./components/ui/Loadingspinner";
 
 // Lazy loaded pages
 const DiscoveryFeedSwipeInterface = lazy(() =>
@@ -23,6 +23,7 @@ const Profile = lazy(() => import("pages/user-profile/[id]"));
 const Login = lazy(() => import("pages/login"));
 const Onboarding = lazy(() => import("pages/onboarding"));
 const SplashScreen = lazy(() => import("pages/splashscreen"));
+const EachEvent = lazy(() => import("pages/community-hub/[id]"));
 
 const Routes = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -120,6 +121,14 @@ const Routes = () => {
                 element={
                   <ProtectedRoute>
                     <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/community-hub/:eventId"
+                element={
+                  <ProtectedRoute>
+                    <EachEvent />
                   </ProtectedRoute>
                 }
               />

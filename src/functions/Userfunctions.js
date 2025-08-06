@@ -1,4 +1,4 @@
-import { doc, setDoc, updateDoc, getDoc,query,collection,getDocs,increment, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, getDoc,query,collection,getDocs,increment, arrayUnion, arrayRemove,where } from 'firebase/firestore';
 import { db } from '../../firebase'; 
 
 // Function to save user data to the 'users' collection
@@ -255,3 +255,74 @@ export const handleSaveProduct = async (userId, productId) => {
     console.error("❌ Error saving product:", error);
   }
 };
+
+//Get all Events
+export const getEvents = async () => {
+  try {
+    // You can order products by createdAt if needed
+    const q = query(collection(db, "events"));
+    const querySnapshot = await getDocs(q);
+
+    const products = querySnapshot.docs.map(doc => ({
+      id:doc.id,
+      ...doc.data()
+    }));
+    return products;
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+    return [];
+  }
+};
+
+//Get User Joined Events
+export const getJoinedEvents = async (userId) => {
+  try {
+    if (!userId) throw new Error("No authenticated user");
+
+    // Query events where participants array contains userId
+    const eventsRef = collection(db, "events");
+    const q = query(eventsRef, where("participants", "array-contains", userId));
+    const querySnapshot = await getDocs(q);
+
+    const events = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return events;
+  } catch (error) {
+    console.error("Error fetching joined events:", error);
+    return [];
+  }
+};
+
+//Join new Event
+export const joinEvent = async (eventId,userId) => {
+  try {
+    if (!userId) throw new Error("No authenticated user");
+
+    const userRef = doc(db, "users", userId);
+
+    // Add eventId to joinedEvents (avoids duplicates)
+    await updateDoc(userRef, {
+      joinedEvents: arrayUnion(eventId),
+    });
+
+    console.log(`✅ Joined event: ${eventId}`);
+    return true;
+  } catch (error) {
+    console.error("❌ Error joining event:", error);
+    return false;
+  }
+};
+
+//Get Event By Id
+export const getEventById = async (eventId) => {
+  const docRef = doc(db, "events", eventId);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return { id: docSnap.id, ...docSnap.data() };
+  }
+  return null;
+};
+

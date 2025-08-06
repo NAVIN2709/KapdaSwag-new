@@ -24,15 +24,6 @@ const OpportunityCard = ({ opportunity, onBookmark, onApply }) => {
     setIsExpanded(!isExpanded);
   };
 
-  const getTypeColor = (type) => {
-    switch (type.toLowerCase()) {
-      case 'contest': return 'bg-warning/20 text-warning border-warning/30';
-      case 'collaboration': return 'bg-primary/20 text-primary border-primary/30';
-      case 'gig': return 'bg-accent/20 text-accent border-accent/30';
-      default: return 'bg-muted/20 text-muted-foreground border-muted/30';
-    }
-  };
-
   const getUrgencyColor = (daysLeft) => {
     if (daysLeft <= 1) return 'text-error';
     if (daysLeft <= 3) return 'text-warning';
@@ -93,7 +84,7 @@ const OpportunityCard = ({ opportunity, onBookmark, onApply }) => {
         </Button>
 
         {/* Type Badge */}
-        <div className={`absolute bottom-3 left-3 px-2 py-1 rounded-full text-xs font-medium border ${getTypeColor(opportunity.type)}`}>
+        <div className={`absolute bottom-3 left-3 px-2 py-1 rounded-full text-xs border bg-black/60 font-bold `}>
           {opportunity.type}
         </div>
       </div>
@@ -132,10 +123,6 @@ const OpportunityCard = ({ opportunity, onBookmark, onApply }) => {
             <div className="flex items-center space-x-1">
               <Icon name="Users" size={14} />
               <span className="font-mono">{opportunity.applicants}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Icon name="Eye" size={14} />
-              <span className="font-mono">{opportunity.views}</span>
             </div>
           </div>
           <div className="flex items-center space-x-1">
@@ -196,18 +183,11 @@ const OpportunityCard = ({ opportunity, onBookmark, onApply }) => {
         {/* Action Buttons */}
         <div className="flex space-x-2 pt-2">
           <Button
-            variant="outline"
-            className="flex-1"
-            onClick={handleApply}
-          >
-            Quick Apply
-          </Button>
-          <Button
             variant="default"
             className="flex-1"
             onClick={handleApply}
           >
-            View Details
+            Quick Apply
           </Button>
         </div>
       </div>
