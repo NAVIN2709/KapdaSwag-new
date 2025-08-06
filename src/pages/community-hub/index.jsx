@@ -79,23 +79,23 @@ const CommunityHub = () => {
   const trendingOpportunities = opportunities.filter((o) => o.isTrending);
 
   const filteredOpportunities = opportunities.filter((opportunity) => {
-    if (activeTab !== "all") {
-      const tabType = activeTab.slice(0, -1);
-      if (opportunity.type?.toLowerCase() !== tabType) return false;
-    }
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      return (
-        opportunity.title?.toLowerCase().includes(query) ||
-        opportunity.brandName?.toLowerCase().includes(query) ||
-        opportunity.type?.toLowerCase().includes(query) ||
-        (opportunity.requirements || []).some((req) =>
-          req.toLowerCase().includes(query)
-        )
-      );
-    }
-    return true;
-  });
+  if (activeTab !== "all") {
+    const tabType = activeTab.slice(0, -1); // removes "s" from tab label
+    if (opportunity.type?.toLowerCase() !== tabType) return false;
+  }
+
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    return (
+      opportunity.title?.toLowerCase().includes(query) ||
+      opportunity.brandName?.toLowerCase().includes(query) ||
+      opportunity.location?.toLowerCase().includes(query) ||
+      opportunity.description?.toLowerCase().includes(query)
+    );
+  }
+
+  return true;
+});
 
   const handleApply = async (opportunity) => {
     if (!user) {

@@ -388,7 +388,6 @@ export const createNewEvent = async (eventData) => {
       guidelines: eventData.guidelines || [],
       requirements: eventData.requirements || [],
       deadline: eventData.deadline,
-      isTrending: eventData.isTrending || false,
       participants: [],
       createdAt: serverTimestamp(),
     };

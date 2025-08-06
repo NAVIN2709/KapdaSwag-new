@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 
-
 const SearchBar = ({ onSearch, placeholder = "Search opportunities, brands..." }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -54,7 +53,7 @@ const SearchBar = ({ onSearch, placeholder = "Search opportunities, brands..." }
             placeholder={placeholder}
             className="
               w-full pl-10 pr-10 py-3 bg-muted/20 border border-border rounded-xl
-              text-foreground placeholder-muted-foreground
+              text-muted-foreground placeholder-muted-foreground
               focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
               animation-spring
             "
