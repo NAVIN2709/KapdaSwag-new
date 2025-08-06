@@ -8,6 +8,7 @@ const OpportunityCard = ({ opportunity, onApply, userId }) => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (opportunity?.participants?.includes(userId)) {
@@ -15,10 +16,16 @@ const OpportunityCard = ({ opportunity, onApply, userId }) => {
     }
   }, [opportunity, userId]);
 
-  const handleApply = (e) => {
+  const handleApply = async (e) => {
     e.stopPropagation();
-    if (!hasJoined) {
-      onApply?.(opportunity);
+    if (hasJoined || loading) return;
+
+    try {
+      setLoading(true);
+      await onApply?.(opportunity);
+      setHasJoined(true);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -144,8 +151,39 @@ const OpportunityCard = ({ opportunity, onApply, userId }) => {
               Joined
             </Button>
           ) : (
-            <Button variant="default" className="flex-1" onClick={handleApply}>
-              Quick Apply
+            <Button
+              variant="default"
+              className="flex-1 flex items-center justify-center gap-2"
+              onClick={handleApply}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
+                    />
+                  </svg>
+                  Applying...
+                </>
+              ) : (
+                'Quick Apply'
+              )}
             </Button>
           )}
         </div>
