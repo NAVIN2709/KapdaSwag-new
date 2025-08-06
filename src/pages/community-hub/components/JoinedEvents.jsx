@@ -56,7 +56,7 @@ const JoinedEvents = ({ user }) => {
           {/* Event Image */}
           <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden flex-shrink-0">
             <img
-              src={event.headerImage}
+              src={event.eventImage}
               alt={event.title}
               className="w-full h-full object-cover"
             />

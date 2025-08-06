@@ -1,18 +1,35 @@
-import { doc, setDoc, updateDoc, getDoc,query,collection,getDocs,increment, arrayUnion, arrayRemove,where } from 'firebase/firestore';
-import { db } from '../../firebase'; 
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  getDoc,
+  query,
+  collection,
+  getDocs,
+  increment,
+  arrayUnion,
+  arrayRemove,
+  where,
+  serverTimestamp,
+  addDoc,
+} from "firebase/firestore";
+import { db } from "../../firebase";
 
 // Function to save user data to the 'users' collection
 export const saveUserData = async (userId, userData) => {
   try {
-    const userRef = doc(db, 'users', userId);
-    await setDoc(userRef, {
-      ...userData,
-      onboardingCompleted:true,
-      updatedAt: new Date()
-    }, { merge: true }); 
-
+    const userRef = doc(db, "users", userId);
+    await setDoc(
+      userRef,
+      {
+        ...userData,
+        onboardingCompleted: true,
+        updatedAt: new Date(),
+      },
+      { merge: true }
+    );
   } catch (error) {
-    console.error('Error saving user data:', error);
+    console.error("Error saving user data:", error);
     throw error;
   }
 };
@@ -20,7 +37,7 @@ export const saveUserData = async (userId, userData) => {
 // Function to get user data from Firestore
 export const getUserData = async (userId) => {
   try {
-    const userRef = doc(db, 'users', userId);
+    const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
@@ -28,7 +45,7 @@ export const getUserData = async (userId) => {
     }
     return null;
   } catch (error) {
-    console.error('Error getting user data:', error);
+    console.error("Error getting user data:", error);
     throw error;
   }
 };
@@ -39,7 +56,11 @@ export const updateUserDetails = async (uid, userData) => {
     const userRef = doc(db, "users", uid);
     const swipeRef = doc(db, "user-swipedata", uid);
     await updateDoc(userRef, userData, { merge: true });
-    await updateDoc(swipeRef, { interests: userData.interests }, { merge: true });
+    await updateDoc(
+      swipeRef,
+      { interests: userData.interests },
+      { merge: true }
+    );
     console.log(userData.bio);
   } catch (error) {
     console.error("Error updating user data:", error);
@@ -50,7 +71,7 @@ export const updateUserDetails = async (uid, userData) => {
 // Function to get matched friends
 export const getFriends = async (userId) => {
   try {
-    const userRef = doc(db, 'users', userId);
+    const userRef = doc(db, "users", userId);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
@@ -58,28 +79,37 @@ export const getFriends = async (userId) => {
     }
 
     const userData = userDoc.data();
-    const matchedFriendIds = Array.isArray(userData.matched) ? userData.matched : [];
+    const matchedFriendIds = Array.isArray(userData.matched)
+      ? userData.matched
+      : [];
 
     const matchedFriends = [];
     for (const friendId of matchedFriendIds) {
-      const friendDoc = await getDoc(doc(db, 'users', friendId));
-      const friendProfileDoc = await getDoc(doc(db, 'user-swipedata', friendId));
-      
+      const friendDoc = await getDoc(doc(db, "users", friendId));
+      const friendProfileDoc = await getDoc(
+        doc(db, "user-swipedata", friendId)
+      );
+
       if (friendDoc.exists()) {
         const friendData = friendDoc.data();
-        const friendProfileData = friendProfileDoc.exists() ? friendProfileDoc.data() : {};
-        
+        const friendProfileData = friendProfileDoc.exists()
+          ? friendProfileDoc.data()
+          : {};
+
         matchedFriends.push({
           id: friendId,
           ...friendData,
-          profilePic: friendData.profilePic || friendProfileData.profilePic || "https://i.pravatar.cc/150?img=1"
+          profilePic:
+            friendData.profilePic ||
+            friendProfileData.profilePic ||
+            "https://i.pravatar.cc/150?img=1",
         });
       }
     }
 
     return matchedFriends;
   } catch (error) {
-    console.error('Error getting matched friends:', error);
+    console.error("Error getting matched friends:", error);
     throw error;
   }
 };
@@ -87,43 +117,54 @@ export const getFriends = async (userId) => {
 // Function to send a friend request
 export const sendFriendRequest = async (senderId, receiverId) => {
   try {
-    const senderRef = doc(db, 'users', senderId);
-    const receiverRef = doc(db, 'users', receiverId);
+    const senderRef = doc(db, "users", senderId);
+    const receiverRef = doc(db, "users", receiverId);
 
     // Get current data
     const senderDoc = await getDoc(senderRef);
     const receiverDoc = await getDoc(receiverRef);
 
     if (!senderDoc.exists() || !receiverDoc.exists()) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     const senderData = senderDoc.data();
     const receiverData = receiverDoc.data();
 
     // Initialize arrays if they don't exist
-    const senderSentRequests = Array.isArray(senderData.sentRequests) ? senderData.sentRequests : [];
-    const senderMatched = Array.isArray(senderData.matched) ? senderData.matched : [];
-    const receiverIncomingRequests = Array.isArray(receiverData.incomingRequests) ? receiverData.incomingRequests : [];
+    const senderSentRequests = Array.isArray(senderData.sentRequests)
+      ? senderData.sentRequests
+      : [];
+    const senderMatched = Array.isArray(senderData.matched)
+      ? senderData.matched
+      : [];
+    const receiverIncomingRequests = Array.isArray(
+      receiverData.incomingRequests
+    )
+      ? receiverData.incomingRequests
+      : [];
 
     // Check if request already exists or if they're already friends
-    if (senderSentRequests.includes(receiverId) || senderMatched.includes(receiverId)) {
-      throw new Error('Friend request already sent or already friends');
+    if (
+      senderSentRequests.includes(receiverId) ||
+      senderMatched.includes(receiverId)
+    ) {
+      throw new Error("Friend request already sent or already friends");
     }
 
     // Update sender's sent requests
     await updateDoc(senderRef, {
-      sentRequests: [...senderSentRequests, receiverId]
+      sentRequests: [...senderSentRequests, receiverId],
     });
 
     // Update receiver's incoming requests
     await updateDoc(receiverRef, {
-      incomingRequests: [...receiverIncomingRequests, senderId]
+      incomingRequests: [...receiverIncomingRequests, senderId],
     });
 
     return true;
   } catch (error) {
-    console.error('Error sending friend request:', error);
+    console.error("Error sending friend request:", error);
     throw error;
   }
 };
@@ -135,9 +176,9 @@ export const getProducts = async () => {
     const q = query(collection(db, "products"));
     const querySnapshot = await getDocs(q);
 
-    const products = querySnapshot.docs.map(doc => ({
-      id:doc.id,
-      ...doc.data()
+    const products = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
     }));
     return products;
   } catch (error) {
@@ -159,7 +200,7 @@ export const handleSwipe = async (product) => {
 
     // Increment likes count by 1
     await updateDoc(productRef, {
-      likes: increment(1)
+      likes: increment(1),
     });
   } catch (error) {
     console.error("❌ Error updating likes:", error);
@@ -177,9 +218,8 @@ export const handleSave = async (userId, product) => {
 
     // Save productId in savedProducts array
     await updateDoc(userRef, {
-      savedProducts: arrayUnion(product.id) // store only the product ID for efficiency
+      savedProducts: arrayUnion(product.id), // store only the product ID for efficiency
     });
-
   } catch (error) {
     console.error("❌ Error saving product:", error);
   }
@@ -192,9 +232,8 @@ export const handleUnsave = async (userId, product) => {
     const userRef = doc(db, "users", userId);
 
     await updateDoc(userRef, {
-      savedProducts: arrayRemove(product.id)
+      savedProducts: arrayRemove(product.id),
     });
-
   } catch (error) {
     console.error("❌ Error removing saved product:", error);
   }
@@ -228,9 +267,8 @@ export const handleUnsaveProduct = async (userId, productId) => {
     const userRef = doc(db, "users", userId);
 
     await updateDoc(userRef, {
-      savedProducts: arrayRemove(productId)
+      savedProducts: arrayRemove(productId),
     });
-
   } catch (error) {
     console.error("❌ Error removing saved product:", error);
   }
@@ -248,9 +286,8 @@ export const handleSaveProduct = async (userId, productId) => {
 
     // Save productId in savedProducts array
     await updateDoc(userRef, {
-      savedProducts: arrayUnion(productId) // store only the product ID for efficiency
+      savedProducts: arrayUnion(productId), // store only the product ID for efficiency
     });
-
   } catch (error) {
     console.error("❌ Error saving product:", error);
   }
@@ -263,9 +300,9 @@ export const getEvents = async () => {
     const q = query(collection(db, "events"));
     const querySnapshot = await getDocs(q);
 
-    const products = querySnapshot.docs.map(doc => ({
-      id:doc.id,
-      ...doc.data()
+    const products = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
     }));
     return products;
   } catch (error) {
@@ -297,18 +334,24 @@ export const getJoinedEvents = async (userId) => {
 };
 
 //Join new Event
-export const joinEvent = async (eventId,userId) => {
+export const joinEvent = async (eventId, userId) => {
   try {
     if (!userId) throw new Error("No authenticated user");
 
     const userRef = doc(db, "users", userId);
+    const eventRef = doc(db, "events", eventId);
 
-    // Add eventId to joinedEvents (avoids duplicates)
-    await updateDoc(userRef, {
-      joinedEvents: arrayUnion(eventId),
-    });
-
-    console.log(`✅ Joined event: ${eventId}`);
+    // Update both user and event
+    await Promise.all([
+      updateDoc(userRef, {
+        joinedEvents: arrayUnion(eventId), // add event to user's joined list
+      }),
+      updateDoc(eventRef, {
+        participants: arrayUnion(userId), // add user to event's participants
+        applicants: increment(1),
+      }),
+    ]);
+    console.log("event joined");
     return true;
   } catch (error) {
     console.error("❌ Error joining event:", error);
@@ -326,3 +369,34 @@ export const getEventById = async (eventId) => {
   return null;
 };
 
+//Create A New Event
+export const createNewEvent = async (eventData) => {
+  try {
+    if (!eventData.title || !eventData.deadline) {
+      throw new Error("Missing required fields: title, deadline");
+    }
+
+    const newEvent = {
+      title: eventData.title,
+      description: eventData.description || "",
+      eventImage: eventData.eventImage || "", // Base64 string
+      brandName: eventData.brandName || "",
+      type: eventData.type || "Contest",
+      reward: eventData.reward || "",
+      location: eventData.location || "",
+      applicants: eventData.applicants || 0,
+      guidelines: eventData.guidelines || [],
+      requirements: eventData.requirements || [],
+      deadline: eventData.deadline,
+      isTrending: eventData.isTrending || false,
+      participants: [],
+      createdAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(collection(db, "events"), newEvent);
+    return { id: docRef.id, ...newEvent };
+  } catch (error) {
+    console.error("Error creating event:", error);
+    throw error;
+  }
+};

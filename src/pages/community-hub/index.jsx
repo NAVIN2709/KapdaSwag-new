@@ -8,21 +8,25 @@ import OpportunityCard from "./components/OpportunityCard";
 import FilterTabs from "./components/FilterTabs";
 import SearchBar from "./components/SearchBar";
 import TrendingSection from "./components/TrendingSection";
-import { getEvents } from "functions/Userfunctions";
+import { getEvents, joinEvent, getUserData } from "functions/Userfunctions";
 import JoinedEvents from "./components/JoinedEvents";
 import { useAuth } from "context/AuthContext";
-import { joinEvent } from "functions/Userfunctions";
+import NewEvent from "./components/NewEvent";
+import { User } from "lucide-react";
 
 const CommunityHub = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState({});
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [opportunities, setOpportunities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isJoinedEventsOpen, setIsJoinedEventsOpen] = useState(false); // NEW: modal state
+  const [isJoinedEventsOpen, setIsJoinedEventsOpen] = useState(false);
+  const [isBrand, setIsBrand] = useState(false);
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
   // Fetch events from API
   const fetchOpportunities = async () => {
@@ -37,8 +41,20 @@ const CommunityHub = () => {
     }
   };
 
+  // Fetch user data (check if brand)
+  const fetchUserData = async () => {
+    try {
+      if (!user) return;
+      const data = await getUserData(user.uid);
+      setIsBrand(data?.isBrand || false);
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+    }
+  };
+
   useEffect(() => {
     fetchOpportunities();
+    fetchUserData();
   }, []);
 
   const tabs = [
@@ -81,29 +97,14 @@ const CommunityHub = () => {
     return true;
   });
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await fetchOpportunities();
-    setIsRefreshing(false);
-  };
-
-  const handleBookmark = (opportunityId, isBookmarked) => {
-    console.log(
-      `${isBookmarked ? "Bookmarked" : "Unbookmarked"} opportunity:`,
-      opportunityId
-    );
-  };
-
   const handleApply = async (opportunity) => {
     if (!user) {
       console.error("User not logged in");
       return;
     }
-
     const success = await joinEvent(opportunity.id, user.uid);
     if (success) {
       console.log(`✅ Joined event: ${opportunity.title}`);
-      // Optional: show toast/snackbar
     } else {
       console.error("❌ Failed to join event");
     }
@@ -126,8 +127,7 @@ const CommunityHub = () => {
                 Community Hub
               </h1>
               <p className="text-muted-foreground">
-                Discover brand collaborations, contests, and creator
-                opportunities
+                Discover brand collaborations, contests, and creator opportunities
               </p>
 
               <div className="flex justify-center gap-3 mt-6">
@@ -169,16 +169,6 @@ const CommunityHub = () => {
             </div>
           )}
 
-          {/* Pull to Refresh */}
-          {isRefreshing && (
-            <div className="flex items-center justify-center py-4 text-primary space-x-2">
-              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-sm font-medium">
-                Refreshing opportunities...
-              </span>
-            </div>
-          )}
-
           {/* Opportunities List */}
           {!loading && filteredOpportunities.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -186,21 +176,14 @@ const CommunityHub = () => {
                 <OpportunityCard
                   key={opportunity.id}
                   opportunity={opportunity}
-                  onBookmark={handleBookmark}
                   onApply={handleApply}
+                  userId={user.uid}
                 />
               ))}
             </div>
           ) : (
             !loading && (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon
-                    name="Search"
-                    size={24}
-                    className="text-muted-foreground"
-                  />
-                </div>
                 <h3 className="text-lg font-medium text-foreground mb-2">
                   No opportunities found
                 </h3>
@@ -225,7 +208,7 @@ const CommunityHub = () => {
 
       <BottomNavigation />
 
-      {/* Modal */}
+      {/* Joined Events Modal */}
       {isJoinedEventsOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4">
           <div className="bg-background rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
@@ -239,6 +222,31 @@ const CommunityHub = () => {
             <JoinedEvents user={user.uid} />
           </div>
         </div>
+      )}
+
+      {/* Create New Event Modal */}
+      {isCreateEventOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4">
+          <div className="bg-background rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+            <button
+              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+              onClick={() => setIsCreateEventOpen(false)}
+            >
+              <Icon name="X" size={20} />
+            </button>
+            <NewEvent />
+          </div>
+        </div>
+      )}
+
+      {/* Floating Create Event Button for Brands */}
+      {isBrand && (
+        <button
+          onClick={() => setIsCreateEventOpen(true)}
+          className="fixed bottom-20 right-6 bg-primary text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:bg-primary/90 transition"
+        >
+          <Icon name="Plus" size={20} />
+        </button>
       )}
     </div>
   );

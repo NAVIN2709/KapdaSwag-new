@@ -100,13 +100,13 @@ const EachEvent = () => {
       {/* Event Images */}
       <div className="relative w-full">
         <Image
-          src={event.headerImage}
+          src={event.eventImage}
           alt="Header"
           className="w-full h-48 object-cover rounded-b-3xl"
         />
         <div className="absolute left-1/2 -bottom-12 -translate-x-1/2">
           <Image
-            src={event.headerImage}
+            src={event.brandLogo}
             alt="Event"
             className="w-28 h-28 rounded-full border-4 border-white shadow-xl"
           />
