@@ -22,6 +22,7 @@ const NewEvent = () => {
 
   const [previewEvent, setPreviewEvent] = useState(null);
   const eventRef = useRef();
+  const brandLogoRef = useRef();
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) =>
