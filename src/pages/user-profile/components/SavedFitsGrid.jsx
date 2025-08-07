@@ -85,8 +85,6 @@ const handleRemove = async (productId, e) => {
   }
 };
 
-
-
   if (loading) {
     return (
       <div className="flex justify-center py-16">
@@ -164,7 +162,7 @@ const handleRemove = async (productId, e) => {
               {/* Price Badge */}
               <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-xs text-white px-2 py-1 rounded-lg">
                 <span className="text-sm font-semibold font-mono">
-                  ${product.price}
+                  ₹{product.price}
                 </span>
               </div>
 

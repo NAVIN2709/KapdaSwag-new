@@ -52,7 +52,7 @@ const UserProfile = () => {
   const handleMessage = () => console.log("Message user");
 
   const handleProductClick = (product) =>
-    navigate("/product-detail", { state: { product } });
+    navigate(`/product-detail/${product.id}`, { state: { product } });
   const handleRemoveProduct = (productId) =>
     setSavedProducts((prev) => prev.filter((id) => id !== productId));
 

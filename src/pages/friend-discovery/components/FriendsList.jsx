@@ -19,7 +19,6 @@ const FriendsList = () => {
       try {
         const matched = await getFriends(user.uid);
         setFriends(matched);
-        console.log(friends)
       } catch (error) {
         console.error("Error loading matched friends:", error);
       } finally {

@@ -51,7 +51,7 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
 
           <div className="flex items-center justify-between">
             <span className="font-bold text-foreground font-mono">
-              ${product.price}
+              ₹{product.price}
             </span>
 
             <div className="flex items-center space-x-3 text-xs text-muted-foreground">
@@ -137,7 +137,7 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
 
         <div className="flex items-center justify-between">
           <span className="font-bold text-foreground font-mono">
-            ${product.price}
+            ₹{product.price}
           </span>
 
           <div className="flex items-center space-x-2 text-xs text-muted-foreground">

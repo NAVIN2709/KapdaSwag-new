@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react'; // Or use an emoji/icon instead
 
 const ProfileHeader = ({ user }) => {
+  console.log(user)
   const navigate = useNavigate();
 
   return (

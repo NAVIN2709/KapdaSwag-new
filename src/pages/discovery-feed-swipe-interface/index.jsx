@@ -149,7 +149,7 @@ const DiscoveryFeedSwipeInterface = () => {
                 />
               ))}
           </AnimatePresence>
-          {isLoading && <LoadingCard delay={0.2} />}
+          {isLoading && <LoadingCard />}
         </div>
 
         {/* Desktop arrows */}
@@ -178,8 +178,7 @@ const DiscoveryFeedSwipeInterface = () => {
           <ol className="list-decimal list-inside text-lg space-y-2">
             <li>Swipe left if you don’t like a product</li>
             <li>Swipe right if you like a product</li>
-            <li>Double tap to like instantly</li>
-            <li>Long press for quick actions</li>
+            <li>Open chats to view reviews</li>
           </ol>
           <button
             onClick={() => setShowInstructions(false)}
