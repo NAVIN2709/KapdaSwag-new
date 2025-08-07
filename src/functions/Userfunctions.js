@@ -102,7 +102,7 @@ export const getFriends = async (userId) => {
           profilePic:
             friendData.profilePic ||
             friendProfileData.profilePic ||
-            "https://i.pravatar.cc/150?img=1",
+            "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
         });
       }
     }
@@ -168,6 +168,48 @@ export const sendFriendRequest = async (senderId, receiverId) => {
     throw error;
   }
 };
+
+// Function to remove a friend
+export const removeFriend = async (userId1, userId2) => {
+  try {
+    const userRef1 = doc(db, "users", userId1);
+    const userRef2 = doc(db, "users", userId2);
+
+    // Fetch documents
+    const userDoc1 = await getDoc(userRef1);
+    const userDoc2 = await getDoc(userRef2);
+
+    if (!userDoc1.exists() || !userDoc2.exists()) {
+      throw new Error("User not found");
+    }
+
+    const userData1 = userDoc1.data();
+    const userData2 = userDoc2.data();
+
+    const matched1 = Array.isArray(userData1.matched) ? userData1.matched : [];
+    const matched2 = Array.isArray(userData2.matched) ? userData2.matched : [];
+
+    // Check if they are actually friends
+    if (!matched1.includes(userId2) || !matched2.includes(userId1)) {
+      throw new Error("Users are not friends");
+    }
+
+    // Remove each other from 'matched'
+    await updateDoc(userRef1, {
+      matched: matched1.filter((id) => id !== userId2),
+    });
+
+    await updateDoc(userRef2, {
+      matched: matched2.filter((id) => id !== userId1),
+    });
+
+    return true;
+  } catch (error) {
+    console.error("Error removing friend:", error);
+    throw error;
+  }
+};
+
 
 // Get products from firestore
 export const getProducts = async () => {

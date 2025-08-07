@@ -114,7 +114,7 @@ const Notifications = () => {
             className="p-4 rounded-xl border bg-white/5 backdrop-blur-md shadow hover:shadow-lg transition flex items-start gap-3"
           >
             <img
-              src={requester.profilePic || "/default-avatar.png"}
+              src={requester.profilePic || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0="}
               alt={requester.name || "User"}
               className="w-10 h-10 rounded-full object-cover"
             />

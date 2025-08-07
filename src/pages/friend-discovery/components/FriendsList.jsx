@@ -19,6 +19,7 @@ const FriendsList = () => {
       try {
         const matched = await getFriends(user.uid);
         setFriends(matched);
+        console.log(friends)
       } catch (error) {
         console.error("Error loading matched friends:", error);
       } finally {
@@ -55,7 +56,7 @@ const FriendsList = () => {
             className="flex items-center bg-white/5 p-3 rounded-xl backdrop-blur-md shadow-md"
           >
             <img
-              src={friend.profilePic}
+              src={friend.profilePic || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0="}
               alt={friend.username}
               className="w-14 h-14 rounded-full object-cover border border-white mr-4"
             />

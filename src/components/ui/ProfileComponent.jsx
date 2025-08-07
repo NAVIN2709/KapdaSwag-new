@@ -9,7 +9,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   getFriends,
   getUserData,
-  sendFriendRequest
+  sendFriendRequest,
+  removeFriend
 } from "functions/Userfunctions";
 import { useAuth } from "../../context/AuthContext";
 
@@ -56,14 +57,13 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
       setFollowState("requested");
     } 
     else if (followState === "following") {
-      // TODO: Add Firestore unfollow / remove friend logic here
-      // await removeFriend(user.uid, id);
+       await removeFriend(user.uid, id);
       setFollowState("unfollowed");
     }
-    else if (followState === "requested") {
+    else {
       // Optionally: cancel the request
       // await cancelFriendRequest(user.uid, id);
-      setFollowState("unfollowed");
+      setFollowState("requested");
     }
   } catch (error) {
     console.error("Error updating follow state:", error);
