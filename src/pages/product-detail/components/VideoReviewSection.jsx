@@ -5,6 +5,7 @@ import Button from "../../../components/ui/Button";
 import { getUserData } from "functions/Userfunctions";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../../../../firebase";
+import Linkify from "linkify-react";
 
 const VideoReviewSection = ({ comments, currentUser, productId }) => {
   const [CurrentUser, setCurrentUser] = useState(null);
@@ -35,6 +36,12 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
     })();
   }, []);
 
+  const options = {
+    defaultProtocol: "https",
+    target: "_blank",
+    rel: "noopener noreferrer",
+  };
+
   // Convert file to Base64
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
@@ -62,7 +69,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             username: CurrentUser.username,
             videoUrl: videoBase64,
             textcomment: textInput.trim() || "",
-            userId:currentUser
+            userId: currentUser,
           }),
         });
         setVideoComments((prev) => [
@@ -71,7 +78,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             username: CurrentUser.username,
             videoUrl: videoBase64,
             textcomment: textInput.trim() || "",
-             userId:currentUser
+            userId: currentUser,
           },
         ]);
       } else {
@@ -82,7 +89,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             username: CurrentUser.username,
             comment: textInput.trim(),
             ...(imageBase64 && { imageBase64 }),
-             userId:currentUser
+            userId: currentUser,
           }),
         });
         setTextComments((prev) => [
@@ -91,7 +98,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             username: CurrentUser.username,
             comment: textInput.trim(),
             ...(imageBase64 && { imageBase64 }),
-             userId:currentUser
+            userId: currentUser,
           },
         ]);
       }
@@ -258,7 +265,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
           {/* Video Caption */}
           {currentVideo.textcomment && (
             <p className="text-muted-foreground text-center mt-2">
-              {currentVideo.textcomment}
+              <Linkify options={options}>{currentVideo.textcomment}</Linkify>
             </p>
           )}
 

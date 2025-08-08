@@ -169,6 +169,49 @@ export const sendFriendRequest = async (senderId, receiverId) => {
   }
 };
 
+// Function to cancel a sent friend request
+export const cancelFriendRequest = async (senderId, receiverId) => {
+  try {
+    const senderRef = doc(db, "users", senderId);
+    const receiverRef = doc(db, "users", receiverId);
+
+    // Get current user documents
+    const senderDoc = await getDoc(senderRef);
+    const receiverDoc = await getDoc(receiverRef);
+
+    if (!senderDoc.exists() || !receiverDoc.exists()) {
+      throw new Error("User not found");
+    }
+
+    const senderData = senderDoc.data();
+    const receiverData = receiverDoc.data();
+
+    const senderSentRequests = senderData.sentRequests || [];
+    const receiverIncomingRequests = receiverData.incomingRequests || [];
+
+    // Check if the request exists before removing
+    if (!senderSentRequests.includes(receiverId)) {
+      throw new Error("No friend request found to cancel");
+    }
+
+    // Remove receiverId from sender's sentRequests
+    await updateDoc(senderRef, {
+      sentRequests: arrayRemove(receiverId),
+    });
+
+    // Remove senderId from receiver's incomingRequests
+    await updateDoc(receiverRef, {
+      incomingRequests: arrayRemove(senderId),
+    });
+
+    console.log("Friend request cancelled");
+    return true;
+  } catch (error) {
+    console.error("Error cancelling friend request:", error);
+    throw error;
+  }
+};
+
 // Function to remove a friend
 export const removeFriend = async (userId1, userId2) => {
   try {

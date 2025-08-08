@@ -11,10 +11,10 @@ import { useNavigate } from "react-router-dom";
 const calculateInterestMatch = (userA, userB) => {
   if (!userA?.interests || !userB?.interests) return 0;
 
-  const setA = new Set(userA.interests.map(i => i.toLowerCase()));
-  const setB = new Set(userB.interests.map(i => i.toLowerCase()));
+  const setA = new Set(userA.interests.map((i) => i.toLowerCase()));
+  const setB = new Set(userB.interests.map((i) => i.toLowerCase()));
 
-  const common = [...setA].filter(tag => setB.has(tag));
+  const common = [...setA].filter((tag) => setB.has(tag));
   const totalUnique = new Set([...setA, ...setB]).size;
 
   return totalUnique > 0 ? (common.length / totalUnique) * 100 : 0;
@@ -36,15 +36,19 @@ const generateSuggestionsForUser = async (currentUser) => {
       otherUser.id === currentUser.id ||
       sentRequests.includes(otherUser.id) ||
       matchedFriends.includes(otherUser.id)
-    ) continue;
+    )
+      continue;
 
     const score = calculateInterestMatch(currentUser, otherUser);
-    if (score > 10) { // match threshold
+    if (score > 10) {
+      // match threshold
       suggestions.push({
         id: otherUser.id,
         username: otherUser.username || "Unknown User",
         displayName: otherUser.name || "",
-        avatar: otherUser.profilePic || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
+        avatar:
+          otherUser.profilePic ||
+          "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
         styleMatch: Math.round(score),
         styleTags: otherUser.interests || [],
       });
@@ -54,7 +58,7 @@ const generateSuggestionsForUser = async (currentUser) => {
 };
 
 const SuggestedUsers = () => {
-  const navigate= useNavigate();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState([]);
   const [loadingStates, setLoadingStates] = useState({});
@@ -89,14 +93,15 @@ const SuggestedUsers = () => {
       setLoadingStates((prev) => ({ ...prev, [userId]: false }));
     }
   };
-  const onUserClick=(user)=>{
-    console.log(user.id)
-    navigate(`/profile/${user.id}`)
-  }
+  const onUserClick = (user) => {
+    navigate(`/profile/${user.id}`);
+  };
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-foreground">Suggested for You</h3>
+      <h3 className="text-lg font-semibold text-foreground">
+        Suggested for You
+      </h3>
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
@@ -125,7 +130,9 @@ const SuggestedUsers = () => {
       ) : (
         <div className="grid gap-4">
           {suggestions.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No suggestions found.</p>
+            <p className="text-muted-foreground text-sm">
+              No suggestions found.
+            </p>
           ) : (
             suggestions.map((user) => {
               const isFriends = followingStates[user.id];
@@ -157,15 +164,49 @@ const SuggestedUsers = () => {
                         </p>
                       </div>
                     </div>
-                    <Button
-                      variant={isFriends ? "outline" : "default"}
-                      size="sm"
+                    <button
                       onClick={() => handleFollow(user.id)}
-                      disabled={isFriends}
-                      loading={isLoading}
+                      disabled={isFriends || isLoading}
+                      className={`group relative inline-flex items-center px-4 py-1.5 text-sm font-medium text-white rounded-full shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                        isFriends
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-500 hover:to-blue-600"
+                      }`}
                     >
+                      {isLoading ? (
+                        <svg
+                          className="animate-spin h-4 w-4 mr-2 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8H4z"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-4 h-4 mr-2 text-white group-hover:scale-110 transform transition-transform"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M18 9a3 3 0 00-6 0v3H9l3 3 3-3h-3V9a1 1 0 112 0v3h2V9z" />
+                        </svg>
+                      )}
                       {isFriends ? "Requested" : "Request"}
-                    </Button>
+                    </button>
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {user.styleTags.map((tag, i) => (

@@ -10,7 +10,8 @@ import {
   getFriends,
   getUserData,
   sendFriendRequest,
-  removeFriend
+  removeFriend,
+  cancelFriendRequest,
 } from "functions/Userfunctions";
 import { useAuth } from "../../context/AuthContext";
 
@@ -29,8 +30,8 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
         const userdata = await getUserData(user.uid);
         const matched = await getFriends(user.uid);
 
-        const isFollowing = matched.some(friend => friend.id === id);
-        const isRequest = userdata.sentRequests?.some(friend => friend.id === id);
+        const isFollowing = matched.includes(id);
+        const isRequest = userdata.sentRequests?.includes(id);
 
         if (isFollowing) {
           setFollowState("following");
@@ -50,26 +51,22 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
   }, [user, id]);
 
   const handleFollow = async () => {
-  try {
-    if (followState === "unfollowed") {
-      // Send friend request in Firestore
-      await sendFriendRequest(user.uid, id);
-      setFollowState("requested");
-    } 
-    else if (followState === "following") {
-       await removeFriend(user.uid, id);
-      setFollowState("unfollowed");
+    try {
+      if (followState === "unfollowed") {
+        // Send friend request in Firestore
+        await sendFriendRequest(user.uid, id);
+        setFollowState("requested");
+      } else if (followState === "following") {
+        await removeFriend(user.uid, id);
+        setFollowState("unfollowed");
+      } else {
+        await cancelFriendRequest(user.uid, id);
+        setFollowState("requested");
+      }
+    } catch (error) {
+      console.error("Error updating follow state:", error);
     }
-    else {
-      // Optionally: cancel the request
-      // await cancelFriendRequest(user.uid, id);
-      setFollowState("requested");
-    }
-  } catch (error) {
-    console.error("Error updating follow state:", error);
-  }
-};
-
+  };
 
   // ✅ Show loader until follow state is ready
   if (loadingFollowState) {
@@ -94,7 +91,10 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
       {/* Avatar + Info */}
       <div className="text-center space-y-4">
         <img
-          src={profile.profilePic || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0="}
+          src={
+            profile.profilePic ||
+            "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0="
+          }
           className="w-24 h-24 mx-auto rounded-full object-cover border-4 border-pink-500"
           alt="Profile"
         />

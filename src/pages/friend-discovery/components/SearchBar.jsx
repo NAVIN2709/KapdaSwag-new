@@ -4,8 +4,10 @@ import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/Button';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../../../firebase'; // Adjust path to your firebase config
+import { useAuth } from 'context/AuthContext';
 
 const SearchBar = ({ onSearch, onUserSelect }) => {
+  const {user}=useAuth();
   const [queryText, setQueryText] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,49 +33,53 @@ const SearchBar = ({ onSearch, onUserSelect }) => {
 
   // Fetch matching users from Firestore
   const fetchUsers = async (searchTerm) => {
-    try {
-      setIsLoading(true);
+  try {
+    setIsLoading(true);
 
-      // Search by username or displayName (case-insensitive)
-      const usersRef = collection(db, 'users');
-      const q = query(
-        usersRef,
-        where('username', '>=', searchTerm.toLowerCase()),
-        where('username', '<=', searchTerm.toLowerCase() + '\uf8ff'),
-        orderBy('username'),
-        limit(10)
-      );
+    const usersRef = collection(db, 'users');
 
-      const snapshot = await getDocs(q);
-      let users = snapshot.docs.map((doc) => ({
+    const q = query(
+      usersRef,
+      where('username', '>=', searchTerm.toLowerCase()),
+      where('username', '<=', searchTerm.toLowerCase() + '\uf8ff'),
+      orderBy('username'),
+      limit(10)
+    );
+
+    const snapshot = await getDocs(q);
+
+    let users = snapshot.docs
+      .filter((doc) => doc.id !== user.uid) // 👈 filter out current user
+      .map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      // Also search by displayName if needed (merge results without duplicates)
-      const q2 = query(
-        usersRef,
-        where('name', '>=', searchTerm),
-        where('name', '<=', searchTerm + '\uf8ff'),
-        orderBy('name'),
-        limit(10)
-      );
+    const q2 = query(
+      usersRef,
+      where('name', '>=', searchTerm),
+      where('name', '<=', searchTerm + '\uf8ff'),
+      orderBy('name'),
+      limit(10)
+    );
 
-      const snapshot2 = await getDocs(q2);
-      snapshot2.docs.forEach((doc) => {
-        if (!users.some((u) => u.id === doc.id)) {
-          users.push({ id: doc.id, ...doc.data() });
-        }
-      });
+    const snapshot2 = await getDocs(q2);
 
-      setSuggestions(users);
-      setShowSuggestions(true);
-    } catch (error) {
-      console.error('Error searching users:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    snapshot2.docs.forEach((doc) => {
+      if (doc.id !== user.uid && !users.some((u) => u.id === doc.id)) {
+        users.push({ id: doc.id, ...doc.data() });
+      }
+    });
+
+    setSuggestions(users);
+    setShowSuggestions(true);
+  } catch (error) {
+    console.error('Error searching users:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // Handle input change
   const handleInputChange = (e) => {
