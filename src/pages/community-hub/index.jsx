@@ -79,23 +79,23 @@ const CommunityHub = () => {
   const trendingOpportunities = opportunities.filter((o) => o.isTrending);
 
   const filteredOpportunities = opportunities.filter((opportunity) => {
-  if (activeTab !== "all") {
-    const tabType = activeTab.slice(0, -1); // removes "s" from tab label
-    if (opportunity.type?.toLowerCase() !== tabType) return false;
-  }
+    if (activeTab !== "all") {
+      const tabType = activeTab.slice(0, -1); // removes "s" from tab label
+      if (opportunity.type?.toLowerCase() !== tabType) return false;
+    }
 
-  if (searchQuery) {
-    const query = searchQuery.toLowerCase();
-    return (
-      opportunity.title?.toLowerCase().includes(query) ||
-      opportunity.brandName?.toLowerCase().includes(query) ||
-      opportunity.location?.toLowerCase().includes(query) ||
-      opportunity.description?.toLowerCase().includes(query)
-    );
-  }
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        opportunity.title?.toLowerCase().includes(query) ||
+        opportunity.brandName?.toLowerCase().includes(query) ||
+        opportunity.location?.toLowerCase().includes(query) ||
+        opportunity.description?.toLowerCase().includes(query)
+      );
+    }
 
-  return true;
-});
+    return true;
+  });
 
   const handleApply = async (opportunity) => {
     if (!user) {
@@ -114,6 +114,23 @@ const CommunityHub = () => {
     setSearchQuery(query);
   };
 
+  // Inside CommunityHub component
+  const handleDeleteOpportunity = async (opportunityId) => {
+    try {
+      // Optimistic UI update: remove from state first
+      setOpportunities((prev) =>
+        prev.filter((opp) => opp.id !== opportunityId)
+      );
+
+      // Or, if you want to just refresh the list after delete:
+      await fetchOpportunities();
+
+      console.log(`✅ Deleted opportunity with ID: ${opportunityId}`);
+    } catch (error) {
+      console.error("❌ Failed to delete opportunity:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -127,7 +144,8 @@ const CommunityHub = () => {
                 Community Hub
               </h1>
               <p className="text-muted-foreground">
-                Discover brand collaborations, contests, and creator opportunities
+                Discover brand collaborations, contests, and creator
+                opportunities
               </p>
 
               <div className="flex justify-center gap-3 mt-6">
@@ -178,6 +196,7 @@ const CommunityHub = () => {
                   opportunity={opportunity}
                   onApply={handleApply}
                   userId={user.uid}
+                  onDelete={handleDeleteOpportunity}
                 />
               ))}
             </div>

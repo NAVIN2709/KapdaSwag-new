@@ -12,6 +12,7 @@ import {
   where,
   serverTimestamp,
   addDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 
@@ -253,7 +254,6 @@ export const removeFriend = async (userId1, userId2) => {
   }
 };
 
-
 // Get products from firestore
 export const getProducts = async () => {
   try {
@@ -475,6 +475,8 @@ export const createNewEvent = async (eventData) => {
       deadline: eventData.deadline,
       participants: [],
       createdAt: serverTimestamp(),
+      hosted_by: eventData.hosted_by,
+      brandLogo:eventData.brandLogo
     };
 
     const docRef = await addDoc(collection(db, "events"), newEvent);
@@ -482,5 +484,28 @@ export const createNewEvent = async (eventData) => {
   } catch (error) {
     console.error("Error creating event:", error);
     throw error;
+  }
+};
+
+//Delete an Event
+export const deleteEvent = async (eventId) => {
+  try {
+    const eventRef = doc(db, "events", eventId);
+
+    // Step 1: Delete all docs in "messages" subcollection
+    const messagesRef = collection(eventRef, "messages");
+    const messagesSnapshot = await getDocs(messagesRef);
+
+    const messageDeletions = messagesSnapshot.docs.map((messageDoc) =>
+      deleteDoc(messageDoc.ref)
+    );
+    await Promise.all(messageDeletions);
+
+    // Step 2: Delete the main event document
+    await deleteDoc(eventRef);
+
+    console.log(`Event ${eventId} and its messages deleted`);
+  } catch (error) {
+    console.error("Error deleting event with messages:", error);
   }
 };

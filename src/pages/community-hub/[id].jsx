@@ -9,6 +9,7 @@ import useEventChat from "functions/useEventChat";
 import { sendEventMessage } from "functions/useEventChat";
 import { useAuth } from "context/AuthContext";
 import { getUserData } from "functions/Userfunctions";
+import Linkify from 'linkify-react';
 
 const EachEvent = () => {
   const navigate = useNavigate();
@@ -24,6 +25,13 @@ const EachEvent = () => {
   const [mediaPreview, setMediaPreview] = useState(null);
   const fileInputRef = useRef();
   const chatEndRef = useRef(null);
+
+const linkifyOptions = {
+  defaultProtocol: 'https',
+  target: '_blank',
+  rel: 'noopener noreferrer',
+  className: 'underline',
+};
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -223,7 +231,9 @@ const EachEvent = () => {
                 {/* Text */}
                 {msg.text && (
                   <p className="break-words leading-snug tracking-wide">
+                    <Linkify options={linkifyOptions}>
                     {msg.text}
+                    </Linkify>
                   </p>
                 )}
               </div>

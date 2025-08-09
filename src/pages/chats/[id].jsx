@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import clsx from "clsx";
 import ProfileHeader from "../chats/components/ProfileHeader";
@@ -8,6 +8,7 @@ import { Dialog } from "@headlessui/react";
 import { useAuth } from "../../context/AuthContext"; // 👈 your auth hook
 import useChat from "functions/useChat"; // 👈 hook you wrote
 import { getUserData } from "functions/Userfunctions";
+import Linkify from "linkify-react";
 
 const ChatScreen = () => {
   const { id: otherUserId } = useParams();
@@ -19,34 +20,42 @@ const ChatScreen = () => {
   const [reaction, setReaction] = useState(null);
   const [otheruserdata, setOtheruserdata] = useState(null);
 
-useEffect(() => {
-  if (!otherUserId) return;
-  const fetchData = async () => {
-    try {
-      const data = await getUserData(otherUserId); // Firestore fetch
-      setOtheruserdata(data);
-    } catch (error) {
-      console.error("Error fetching other user data:", error);
-    }
+  const linkifyOptions = {
+    defaultProtocol: "https",
+    target: "_blank",
+    rel: "noopener noreferrer",
+    className: "underline",
   };
-  fetchData();
-}, [otherUserId]);
 
-// Prevent error when data not loaded yet
-if (!otheruserdata || !currentUserId) {
-  return (
-    <div className="flex items-center justify-center h-screen text-gray-400">
-      Loading chat...
-    </div>
-  );
-}
+  useEffect(() => {
+    if (!otherUserId) return;
+    const fetchData = async () => {
+      try {
+        const data = await getUserData(otherUserId); // Firestore fetch
+        setOtheruserdata(data);
+      } catch (error) {
+        console.error("Error fetching other user data:", error);
+      }
+    };
+    fetchData();
+  }, [otherUserId]);
 
-const user = {
-  id: otherUserId,
-  username: otheruserdata.username || "Unknown User",
-  profilePicture: otheruserdata.profilePic || "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
-};
+  // Prevent error when data not loaded yet
+  if (!otheruserdata || !currentUserId) {
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-400">
+        Loading chat...
+      </div>
+    );
+  }
 
+  const user = {
+    id: otherUserId,
+    username: otheruserdata.username || "Unknown User",
+    profilePicture:
+      otheruserdata.profilePic ||
+      "https://media.istockphoto.com/id/1495088043/vector/user-profile-icon-avatar-or-person-icon-profile-picture-portrait-symbol-default-portrait.jpg?s=612x612&w=0&k=20&c=dhV2p1JwmloBTOaGAtaA3AW1KSnjsdMt7-U_3EZElZ0=",
+  };
 
   const handleImageClick = (url) => setFullscreenImage(url);
   const handleDoubleTap = (id) => setReaction(id);
@@ -78,7 +87,11 @@ const user = {
                     : "bg-white text-gray-800 shadow-lg shadow-purple-300/40"
                 )}
               >
-                {msg.text && <p>{msg.text}</p>}
+                {msg.text && (
+                  <p>
+                    <Linkify options={linkifyOptions}>{msg.text}</Linkify>
+                  </p>
+                )}
                 {msg.image && (
                   <img
                     onClick={() => handleImageClick(msg.image)}

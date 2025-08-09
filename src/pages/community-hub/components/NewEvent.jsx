@@ -3,8 +3,10 @@ import Button from "../../../components/ui/Button";
 import Icon from "../../../components/AppIcon";
 import { createNewEvent } from "functions/Userfunctions";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "context/AuthContext";
 
 const NewEvent = () => {
+  const {user}=useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
@@ -18,6 +20,7 @@ const NewEvent = () => {
     requirements: "",
     eventImage: "",
     brandLogo: "",
+    hosted_by:user.uid
   });
 
   const [previewEvent, setPreviewEvent] = useState(null);

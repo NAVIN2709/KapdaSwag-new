@@ -11,7 +11,7 @@ import Button from "../../../components/ui/Button";
 import CommentsModal from "../components/CommentsModal";
 import { getUserData } from "functions/Userfunctions";
 import { useAuth } from "../../../context/AuthContext"; // Auth context
-import { handleUnsave,handleSave } from "functions/Userfunctions";
+import { handleUnsave, handleSave } from "functions/Userfunctions";
 
 const ProductCard = ({
   product,
@@ -25,7 +25,7 @@ const ProductCard = ({
   const [isSaved, setIsSaved] = useState(false);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [lastTap, setLastTap] = useState(0);
-  const [CurrentUser, setCurrentUser] = useState(null)
+  const [CurrentUser, setCurrentUser] = useState(null);
   const [showComments, setShowComments] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState(null); // "left" or "right"
 
@@ -90,19 +90,19 @@ const ProductCard = ({
   };
 
   const toggleSave = async () => {
-  if (!user?.uid) {
-    alert("Please log in to save products");
-    return;
-  }
+    if (!user?.uid) {
+      alert("Please log in to save products");
+      return;
+    }
 
-  if (isSaved) {
-    await handleUnsave(user.uid, product);
-  } else {
-    await handleSave(user.uid, product);
-  }
+    if (isSaved) {
+      await handleUnsave(user.uid, product);
+    } else {
+      await handleSave(user.uid, product);
+    }
 
-  setIsSaved(prev => !prev);
-};
+    setIsSaved((prev) => !prev);
+  };
 
   useEffect(() => {
     controls.start({ x: 0, scale: 1 });
@@ -118,10 +118,9 @@ const ProductCard = ({
       dragMomentum={true}
       onDragEnd={handleDragEnd}
       onTap={handleTap}
-      whileDrag={{ scale: 1.05 }}
-      initial={{ scale: 0.95 }}
+      initial={{ scale: 1 }}
       animate={controls}
-      exit={{ scale: 0.95 }}
+      exit={{ scale: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       {/* Card Content */}
@@ -164,12 +163,14 @@ const ProductCard = ({
 
         {/* Quick Actions */}
         <div className="absolute right-6 bottom-[150px] transform -translate-y-1/2 space-y-3 space-x-2 z-50">
-           <Button
+          <Button
             variant="ghost"
             size="icon"
             onClick={toggleSave}
             className={`w-12 h-12 rounded-full ${
-              isSaved ? "text-white bg-green" : "bg-black/40 text-white hover:bg-black/60"
+              isSaved
+                ? "text-white bg-green"
+                : "bg-black/40 text-white hover:bg-black/60"
             } backdrop-blur-xs`}
           >
             <Icon name={isSaved ? "Bookmark" : "BookmarkPlus"} size={20} />

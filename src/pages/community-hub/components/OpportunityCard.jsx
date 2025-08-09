@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
-import Button from '../../../components/ui/Button';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Icon from "../../../components/AppIcon";
+import Image from "../../../components/AppImage";
+import Button from "../../../components/ui/Button";
+import { deleteEvent } from "functions/Userfunctions";
 
-const OpportunityCard = ({ opportunity, onApply, userId }) => {
+const OpportunityCard = ({
+  opportunity,
+  onApply,
+  userId,
+  onDeleteOpportunity,
+}) => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -34,9 +40,9 @@ const OpportunityCard = ({ opportunity, onApply, userId }) => {
   };
 
   const getUrgencyColor = (daysLeft) => {
-    if (daysLeft <= 1) return 'text-error';
-    if (daysLeft <= 3) return 'text-warning';
-    return 'text-muted-foreground';
+    if (daysLeft <= 1) return "text-error";
+    if (daysLeft <= 3) return "text-warning";
+    return "text-muted-foreground";
   };
 
   const formatDeadline = (deadline) => {
@@ -45,15 +51,28 @@ const OpportunityCard = ({ opportunity, onApply, userId }) => {
     const diffTime = date - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 0) return 'Expired';
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return '1 day left';
+    if (diffDays < 0) return "Expired";
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "1 day left";
     return `${diffDays} days left`;
+  };
+
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    try {
+      await deleteEvent(opportunity.id);
+      console.log("Event deleted");
+      onDelete?.(opportunity.id); // 🔹 notify parent to refresh/remove
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
   };
 
   return (
     <div
-      className={`bg-card border border-border rounded-xl overflow-hidden cursor-pointer animation-spring hover:border-primary/30 hover:shadow-lg ${opportunity.isTrending ? 'ring-2 ring-primary/20 shadow-glow' : ''}`}
+      className={`bg-card border border-border rounded-xl overflow-hidden cursor-pointer animation-spring hover:border-primary/30 hover:shadow-lg ${
+        opportunity.isTrending ? "ring-2 ring-primary/20 shadow-glow" : ""
+      }`}
       onClick={handleCardClick}
     >
       {/* Header Image */}
@@ -70,6 +89,15 @@ const OpportunityCard = ({ opportunity, onApply, userId }) => {
             <Icon name="TrendingUp" size={12} />
             <span>Trending</span>
           </div>
+        )}
+        {/* Delete button for host */}
+        {opportunity.hosted_by === userId && (
+          <button
+            onClick={handleDelete}
+            className="absolute top-3 right-3 bg-black/60 p-1 rounded-full hover:bg-black/80 transition"
+          >
+            <Icon name="Trash2" size={16} className="text-white" />
+          </button>
         )}
 
         {/* Type Badge */}
@@ -91,17 +119,26 @@ const OpportunityCard = ({ opportunity, onApply, userId }) => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold truncate">{opportunity.title}</h3>
-            <p className="text-sm text-muted-foreground">{opportunity.brandName}</p>
+            <p className="text-sm text-muted-foreground">
+              {opportunity.brandName}
+            </p>
           </div>
         </div>
 
         {/* Compensation & Deadline */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Icon name="DollarSign" size={16} className="text-accent" />
+            <Icon name="IndianRupee" size={16} className="text-accent" />
             <span className="font-semibold">{opportunity.reward}</span>
           </div>
-          <div className={`text-sm font-medium ${getUrgencyColor(Math.ceil((new Date(opportunity.deadline) - new Date()) / (1000 * 60 * 60 * 24)))}`}>
+          <div
+            className={`text-sm font-medium ${getUrgencyColor(
+              Math.ceil(
+                (new Date(opportunity.deadline) - new Date()) /
+                  (1000 * 60 * 60 * 24)
+              )
+            )}`}
+          >
             {formatDeadline(opportunity.deadline)}
           </div>
         </div>
@@ -125,7 +162,9 @@ const OpportunityCard = ({ opportunity, onApply, userId }) => {
           <div className="space-y-3 pt-3 border-t border-border">
             <div>
               <h4 className="font-medium mb-1">Description</h4>
-              <p className="text-sm text-muted-foreground break-words">{opportunity.description}</p>
+              <p className="text-sm text-muted-foreground break-words">
+                {opportunity.description}
+              </p>
             </div>
 
             <div>
@@ -182,7 +221,7 @@ const OpportunityCard = ({ opportunity, onApply, userId }) => {
                   Applying...
                 </>
               ) : (
-                'Quick Apply'
+                "Quick Apply"
               )}
             </Button>
           )}
