@@ -104,7 +104,7 @@ const CommunityHub = () => {
     }
     const success = await joinEvent(opportunity.id, user.uid);
     if (success) {
-      console.log(`✅ Joined event: ${opportunity.title}`);
+      console.log(`✅ Joined event`);
     } else {
       console.error("❌ Failed to join event");
     }
@@ -124,8 +124,6 @@ const CommunityHub = () => {
 
       // Or, if you want to just refresh the list after delete:
       await fetchOpportunities();
-
-      console.log(`✅ Deleted opportunity with ID: ${opportunityId}`);
     } catch (error) {
       console.error("❌ Failed to delete opportunity:", error);
     }
@@ -253,7 +251,12 @@ const CommunityHub = () => {
             >
               <Icon name="X" size={20} />
             </button>
-            <NewEvent />
+            <NewEvent
+              closeModal={() => {
+                setIsCreateEventOpen(false);
+                fetchOpportunities();
+              }}
+            />
           </div>
         </div>
       )}

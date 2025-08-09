@@ -5,8 +5,8 @@ import { createNewEvent } from "functions/Userfunctions";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "context/AuthContext";
 
-const NewEvent = () => {
-  const {user}=useAuth();
+const NewEvent = ({closeModal}) => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
@@ -20,7 +20,7 @@ const NewEvent = () => {
     requirements: "",
     eventImage: "",
     brandLogo: "",
-    hosted_by:user.uid
+    hosted_by: user.uid,
   });
 
   const [previewEvent, setPreviewEvent] = useState(null);
@@ -53,6 +53,7 @@ const NewEvent = () => {
     try {
       await createNewEvent(form);
       alert("✅ Event created successfully!");
+      closeModal?.()
     } catch (err) {
       console.error(err);
       alert("❌ Error creating event");
@@ -138,7 +139,7 @@ const NewEvent = () => {
                 className="w-full border rounded-lg px-3 py-2 bg-transparent"
               />
             </div>
-            
+
             {/* Brand Logo Upload */}
             <div>
               <label className="block text-sm font-medium mb-2">

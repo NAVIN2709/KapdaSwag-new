@@ -436,7 +436,6 @@ export const joinEvent = async (eventId, userId) => {
         applicants: increment(1),
       }),
     ]);
-    console.log("event joined");
     return true;
   } catch (error) {
     console.error("❌ Error joining event:", error);
@@ -504,7 +503,6 @@ export const deleteEvent = async (eventId) => {
     // Step 2: Delete the main event document
     await deleteDoc(eventRef);
 
-    console.log(`Event ${eventId} and its messages deleted`);
   } catch (error) {
     console.error("Error deleting event with messages:", error);
   }

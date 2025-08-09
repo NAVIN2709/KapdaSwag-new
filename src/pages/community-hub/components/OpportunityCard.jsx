@@ -9,7 +9,7 @@ const OpportunityCard = ({
   opportunity,
   onApply,
   userId,
-  onDeleteOpportunity,
+  onDelete,
 }) => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -61,8 +61,7 @@ const OpportunityCard = ({
     e.stopPropagation();
     try {
       await deleteEvent(opportunity.id);
-      console.log("Event deleted");
-      onDelete?.(opportunity.id); // 🔹 notify parent to refresh/remove
+      onDelete?.(opportunity.id);
     } catch (error) {
       console.error("Error deleting event:", error);
     }
