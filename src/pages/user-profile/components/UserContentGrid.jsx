@@ -107,24 +107,63 @@ const UserContentGrid = ({ onContentClick }) => {
     setItems(commentsList);
   };
 
-  const handleDelete = async (item) => {
-    if (!window.confirm("Are you sure you want to delete this?")) return;
+  // Helper to extract public_id from Cloudinary URL
+const getPublicIdFromUrl = (url) => {
+  try {
+    const parts = url.split("/upload/");
+    if (parts.length !== 2) return null;
 
-    try {
-      if (isBrand && item.type === "product") {
-        await deleteDoc(doc(db, "products", item.id));
-        setItems((prev) => prev.filter((p) => p.id !== item.id));
-      } else {
-        const productRef = doc(db, "products", item.productId);
-        await updateDoc(productRef, {
-          [`comments.${item.commentType}`]: arrayRemove(item.originalComment),
-        });
-        setItems((prev) => prev.filter((c) => c.id !== item.id));
-      }
-    } catch (error) {
-      console.error("Error deleting:", error);
+    let publicIdWithVersion = parts[1]; // e.g. v123/products/abc123.jpg
+
+    // Remove version like v123456/
+    publicIdWithVersion = publicIdWithVersion.replace(/^v\d+\//, "");
+
+    // Remove file extension
+    const lastDot = publicIdWithVersion.lastIndexOf(".");
+    if (lastDot === -1) return publicIdWithVersion;
+
+    return publicIdWithVersion.substring(0, lastDot);
+  } catch (error) {
+    console.error("Failed to extract public_id:", error);
+    return null;
+  }
+};
+
+const handleDelete = async (item) => {
+  if (!window.confirm("Are you sure you want to delete this?")) return;
+
+  try {
+    let publicId = null;
+
+    if (isBrand && item.type === "product" && item.image) {
+      publicId = getPublicIdFromUrl(item.image);
+      console.log(publicId)
+    } else if (!isBrand && (item.type === "image" || item.type === "video") && item.media) {
+      publicId = getPublicIdFromUrl(item.media);
     }
-  };
+
+    if (publicId) {
+      // Call your backend delete endpoint
+      await fetch(`https://kapdaswag-upload.onrender.com/delete/${encodeURIComponent(publicId)}`, {
+        method: "DELETE",
+      });
+    }
+
+    if (isBrand && item.type === "product") {
+      await deleteDoc(doc(db, "products", item.id));
+      setItems((prev) => prev.filter((p) => p.id !== item.id));
+    } else {
+      const productRef = doc(db, "products", item.productId);
+      await updateDoc(productRef, {
+        [`comments.${item.commentType}`]: arrayRemove(item.originalComment),
+      });
+      setItems((prev) => prev.filter((c) => c.id !== item.id));
+    }
+  } catch (error) {
+    console.error("Error deleting:", error);
+  }
+};
+
 
   if (loading) {
     return (
