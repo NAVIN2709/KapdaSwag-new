@@ -101,12 +101,18 @@ const ProductDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column - Images */}
               <div className="sticky top-24">
-                <ProductImageCarousel
-                  images={product.images}
-                  productName={product.name}
-                  onLike={handleLike}
-                  isLiked={isLiked}
-                />
+                {product?.image && (
+                  <ProductImageCarousel
+                    media={[
+                      product.image,
+                      ...(product.extraImages || []),
+                      ...(product.videos || []),
+                    ]}
+                    productName={product.name}
+                    onLike={handleLike}
+                    isLiked={isLiked}
+                  />
+                )}
               </div>
 
               {/* Right Column */}
@@ -136,7 +142,11 @@ const ProductDetail = () => {
         {/* Mobile Layout */}
         <div className="lg:hidden">
           <ProductImageCarousel
-            images={[product.image]}
+            media={[
+              product.image,
+              ...(product.extraImages || []),
+              ...(product.videos || []),
+            ]}
             productName={product.name}
             onLike={handleLike}
             isLiked={isLiked}

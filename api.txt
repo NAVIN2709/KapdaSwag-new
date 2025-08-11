@@ -1,3 +1,0 @@
-secret=ugjtIH2pQWviEaH6BA5Le7tLCfU
-key=772676611656186
-cloud=dbzu2zrzt

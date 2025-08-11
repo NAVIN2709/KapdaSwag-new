@@ -11,7 +11,7 @@ import {
   query,
   where,
   deleteDoc,
-  getDoc
+  getDoc,
 } from "firebase/firestore";
 import { useAuth } from "context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -56,7 +56,7 @@ const UserContentGrid = ({ onContentClick }) => {
     const products = snapshot.docs.map((docSnap) => ({
       id: docSnap.id,
       ...docSnap.data(),
-      type: "product"
+      type: "product",
     }));
     setItems(products);
   };
@@ -86,7 +86,7 @@ const UserContentGrid = ({ onContentClick }) => {
           title: comment.comment || "",
           productTitle: data.name || "Untitled",
           originalComment: comment,
-          commentType: "text"
+          commentType: "text",
         });
       });
 
@@ -99,7 +99,7 @@ const UserContentGrid = ({ onContentClick }) => {
           title: comment.textcomment || "",
           productTitle: data.name || "Untitled",
           originalComment: comment,
-          commentType: "video"
+          commentType: "video",
         });
       });
     });
@@ -117,7 +117,7 @@ const UserContentGrid = ({ onContentClick }) => {
       } else {
         const productRef = doc(db, "products", item.productId);
         await updateDoc(productRef, {
-          [`comments.${item.commentType}`]: arrayRemove(item.originalComment)
+          [`comments.${item.commentType}`]: arrayRemove(item.originalComment),
         });
         setItems((prev) => prev.filter((c) => c.id !== item.id));
       }
@@ -140,9 +140,7 @@ const UserContentGrid = ({ onContentClick }) => {
         <div className="w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
           <Icon name="Camera" size={24} className="text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">
-          No Posts
-        </h3>
+        <h3 className="text-lg font-semibold text-foreground mb-2">No Posts</h3>
         <p className="text-muted-foreground text-center mb-6">
           {isBrand
             ? "You haven't posted any products yet."
@@ -203,8 +201,9 @@ const UserContentGrid = ({ onContentClick }) => {
                   </p>
                 )}
                 {item.price && (
-                  <p className="text-sm text-foreground truncate">
-                    ${item.price}
+                  <p className="text-sm text-foreground truncate flex items-center">
+                    <Icon name="IndianRupee" className="mr-1" size={15} />
+                    {item.price}
                   </p>
                 )}
               </div>

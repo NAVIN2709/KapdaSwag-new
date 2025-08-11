@@ -5,7 +5,7 @@ import { createNewEvent } from "functions/Userfunctions";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "context/AuthContext";
 
-const NewEvent = ({closeModal}) => {
+const NewEvent = ({ closeModal }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -53,7 +53,7 @@ const NewEvent = ({closeModal}) => {
     try {
       await createNewEvent(form);
       alert("✅ Event created successfully!");
-      closeModal?.()
+      closeModal?.();
     } catch (err) {
       console.error(err);
       alert("❌ Error creating event");

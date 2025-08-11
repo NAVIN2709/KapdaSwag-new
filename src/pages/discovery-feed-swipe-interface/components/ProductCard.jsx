@@ -125,9 +125,9 @@ const ProductCard = ({
     >
       {/* Card Content */}
       <div className="relative w-full h-full bg-muted/20 overflow-hidden rounded-2xl">
-        {product.video ? (
+        {product?.videos?.[0] ? (
           <video
-            src={product.video}
+            src={product.videos[0]}
             autoPlay
             muted
             loop
@@ -186,7 +186,7 @@ const ProductCard = ({
           </Button>
 
           <a
-            href={product?.shop}
+            href={product?.productlink}
             target="_blank"
             rel="noopener noreferrer"
             className="w-30 bg-primary text-white px-6 py-2 rounded-full text-md font-semibold shadow backdrop-blur-xs inline-block text-center"
@@ -202,10 +202,12 @@ const ProductCard = ({
               <Icon name="Heart" size={16} className="text-error" />
               <span className="text-sm font-mono">{product.likes}</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <Icon name="Star" size={16} className="text-warning" />
-              <span className="text-sm font-mono">{product.rating}</span>
-            </div>
+            {product?.rating && (
+              <div className="flex items-center space-x-1">
+                <Icon name="Star" size={16} className="text-warning" />
+                <span className="text-sm font-mono">{product.rating}</span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

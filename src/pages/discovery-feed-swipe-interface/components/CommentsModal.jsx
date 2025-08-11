@@ -3,6 +3,7 @@ import Icon from "../../../components/AppIcon";
 import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import { useAuth } from "context/AuthContext";
+import axios from "axios";
 
 const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
   const { user } = useAuth();
@@ -17,13 +18,21 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
     }
   };
 
-  const fileToBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  const uploadFileAndGetUrl = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await axios.post(
+        "https://kapdaswag-upload.onrender.com/upload-comments",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      return res.data.url; // your backend should return { url: "https://..." }
+    } catch (error) {
+      console.error("File upload failed:", error);
+      throw error;
+    }
+  };
 
   const handleAddComment = async () => {
     if (!newComment.trim() && !mediaFile) return;
@@ -35,16 +44,17 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
     setIsSubmitting(true);
     try {
       const productRef = doc(db, "products", productId);
+      let mediaUrl = null;
 
       if (mediaFile) {
-        const base64String = await fileToBase64(mediaFile);
+        mediaUrl = await uploadFileAndGetUrl(mediaFile);
         const isVideo = mediaFile.type.startsWith("video");
 
         if (isVideo) {
           await updateDoc(productRef, {
             "comments.video": arrayUnion({
               username: currentUser.username,
-              videoUrl: base64String,
+              videoUrl: mediaUrl,
               textcomment: newComment.trim() || "",
               userId: user.uid,
             }),
@@ -53,7 +63,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
             ...(comments.video || []),
             {
               username: currentUser.username,
-              videoUrl: base64String,
+              videoUrl: mediaUrl,
               textcomment: newComment.trim() || "",
               userId: user.uid,
             },
@@ -63,7 +73,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
             "comments.text": arrayUnion({
               username: currentUser.username,
               comment: newComment.trim(),
-              imageBase64: base64String,
+              imageUrl: mediaUrl,
               userId: user.uid,
             }),
           });
@@ -72,7 +82,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
             {
               username: currentUser.username,
               comment: newComment.trim(),
-              imageBase64: base64String,
+              imageUrl: mediaUrl,
               userId: user.uid,
             },
           ];
@@ -94,6 +104,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
           },
         ];
       }
+
       setNewComment("");
       setMediaFile(null);
     } catch (error) {
@@ -129,9 +140,9 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
                 @{commentObj.username}
               </p>
               <p className="text-white text-sm">{commentObj.comment}</p>
-              {commentObj.imageBase64 && (
+              {commentObj.imageUrl && (
                 <img
-                  src={commentObj.imageBase64}
+                  src={commentObj.imageUrl}
                   alt="comment media"
                   className="mt-2 rounded-lg max-h-52 object-cover shadow"
                 />
