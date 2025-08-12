@@ -15,6 +15,7 @@ import {
 } from "firebase/firestore";
 import { useAuth } from "context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { deleteCloudinaryByUrl } from "functions/Userfunctions";
 
 const UserContentGrid = ({ onContentClick }) => {
   const { user: authUser } = useAuth();
@@ -107,63 +108,42 @@ const UserContentGrid = ({ onContentClick }) => {
     setItems(commentsList);
   };
 
-  // Helper to extract public_id from Cloudinary URL
-const getPublicIdFromUrl = (url) => {
-  try {
-    const parts = url.split("/upload/");
-    if (parts.length !== 2) return null;
+  const handleDelete = async (item) => {
+    if (!window.confirm("Are you sure you want to delete this?")) return;
 
-    let publicIdWithVersion = parts[1]; // e.g. v123/products/abc123.jpg
+    try {
+      let mediaUrl = null;
 
-    // Remove version like v123456/
-    publicIdWithVersion = publicIdWithVersion.replace(/^v\d+\//, "");
+      if (isBrand && item.type === "product" && item.image) {
+        mediaUrl = item.image;
+      } else if (
+        !isBrand &&
+        (item.type === "image" || item.type === "video") &&
+        item.media
+      ) {
+        mediaUrl = item.media;
+      }
 
-    // Remove file extension
-    const lastDot = publicIdWithVersion.lastIndexOf(".");
-    if (lastDot === -1) return publicIdWithVersion;
+      // If there's a Cloudinary URL, delete from Cloudinary
+      if (mediaUrl) {
+        await deleteCloudinaryByUrl(mediaUrl);
+      }
 
-    return publicIdWithVersion.substring(0, lastDot);
-  } catch (error) {
-    console.error("Failed to extract public_id:", error);
-    return null;
-  }
-};
-
-const handleDelete = async (item) => {
-  if (!window.confirm("Are you sure you want to delete this?")) return;
-
-  try {
-    let publicId = null;
-
-    if (isBrand && item.type === "product" && item.image) {
-      publicId = getPublicIdFromUrl(item.image);
-      console.log(publicId)
-    } else if (!isBrand && (item.type === "image" || item.type === "video") && item.media) {
-      publicId = getPublicIdFromUrl(item.media);
+      // Delete from Firestore
+      if (isBrand && item.type === "product") {
+        await deleteDoc(doc(db, "products", item.id));
+        setItems((prev) => prev.filter((p) => p.id !== item.id));
+      } else {
+        const productRef = doc(db, "products", item.productId);
+        await updateDoc(productRef, {
+          [`comments.${item.commentType}`]: arrayRemove(item.originalComment),
+        });
+        setItems((prev) => prev.filter((c) => c.id !== item.id));
+      }
+    } catch (error) {
+      console.error("Error deleting:", error);
     }
-
-    if (publicId) {
-      // Call your backend delete endpoint
-      await fetch(`https://kapdaswag-upload.onrender.com/delete/${encodeURIComponent(publicId)}`, {
-        method: "DELETE",
-      });
-    }
-
-    if (isBrand && item.type === "product") {
-      await deleteDoc(doc(db, "products", item.id));
-      setItems((prev) => prev.filter((p) => p.id !== item.id));
-    } else {
-      const productRef = doc(db, "products", item.productId);
-      await updateDoc(productRef, {
-        [`comments.${item.commentType}`]: arrayRemove(item.originalComment),
-      });
-      setItems((prev) => prev.filter((c) => c.id !== item.id));
-    }
-  } catch (error) {
-    console.error("Error deleting:", error);
-  }
-};
-
+  };
 
   if (loading) {
     return (

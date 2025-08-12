@@ -507,3 +507,45 @@ export const deleteEvent = async (eventId) => {
     console.error("Error deleting event with messages:", error);
   }
 };
+
+// Delete a Cloudinary resource by URL
+const deleteCloudinaryByUrl = async (url) => {
+  try {
+    if (!url) throw new Error("No URL provided");
+
+    // Extract public_id from Cloudinary URL
+    const getPublicIdFromUrl = (cloudUrl) => {
+      const parts = cloudUrl.split("/upload/");
+      if (parts.length !== 2) return null;
+
+      let publicIdWithVersion = parts[1]; // e.g. v123/folder/file.jpg
+
+      // Remove version prefix like v123456/
+      publicIdWithVersion = publicIdWithVersion.replace(/^v\d+\//, "");
+
+      // Remove file extension
+      const lastDot = publicIdWithVersion.lastIndexOf(".");
+      return lastDot === -1
+        ? publicIdWithVersion
+        : publicIdWithVersion.substring(0, lastDot);
+    };
+
+    const publicId = getPublicIdFromUrl(url);
+    if (!publicId) throw new Error("Invalid Cloudinary URL");
+
+    // Call backend to delete
+    const response = await fetch(
+      `https://kapdaswag-upload.onrender.com/delete/${encodeURIComponent(publicId)}`,
+      { method: "DELETE" }
+    );
+
+    if (!response.ok) throw new Error(`Delete failed: ${response.statusText}`);
+
+    console.log(`Deleted Cloudinary resource: ${publicId}`);
+    return true;
+  } catch (error) {
+    console.error("Error deleting Cloudinary resource:", error);
+    return false;
+  }
+};
+
