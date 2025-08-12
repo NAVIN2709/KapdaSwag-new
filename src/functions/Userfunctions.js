@@ -509,7 +509,7 @@ export const deleteEvent = async (eventId) => {
 };
 
 // Delete a Cloudinary resource by URL
-const deleteCloudinaryByUrl = async (url) => {
+export const deleteCloudinaryByUrl = async (url) => {
   try {
     if (!url) throw new Error("No URL provided");
 
