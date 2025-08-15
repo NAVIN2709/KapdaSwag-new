@@ -27,39 +27,39 @@ const UserContentGrid = ({ onContentClick }) => {
   useEffect(() => {
     if (!authUser?.uid) return;
 
-    const fetchUserType = async () => {
+    const fetchData = async () => {
       try {
-        // Fetch full user doc to check if they are brand
         const userDocRef = doc(db, "users", authUser.uid);
         const userSnap = await getDoc(userDocRef);
         const userData = userSnap.exists() ? userSnap.data() : {};
         setIsBrand(!!userData.isBrand);
 
-        // Fetch data accordingly
-        if (userData.isBrand) {
-          await fetchBrandProducts(authUser.uid);
-        } else {
-          await fetchUserComments(authUser.uid);
-        }
+        // Fetch both regardless of isBrand
+        const [products, comments] = await Promise.all([
+          fetchBrandProducts(authUser.uid),
+          fetchUserComments(authUser.uid),
+        ]);
+
+        // Merge into single list
+        setItems([...products, ...comments]);
       } catch (error) {
-        console.error("Error fetching user type:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserType();
+    fetchData();
   }, [authUser]);
 
   const fetchBrandProducts = async (uid) => {
     const q = query(collection(db, "products"), where("createdBy", "==", uid));
     const snapshot = await getDocs(q);
-    const products = snapshot.docs.map((docSnap) => ({
+    return snapshot.docs.map((docSnap) => ({
       id: docSnap.id,
       ...docSnap.data(),
       type: "product",
     }));
-    setItems(products);
   };
 
   const fetchUserComments = async (uid) => {
@@ -105,7 +105,7 @@ const UserContentGrid = ({ onContentClick }) => {
       });
     });
 
-    setItems(commentsList);
+    return commentsList;
   };
 
   const handleDelete = async (item) => {
