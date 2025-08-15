@@ -550,25 +550,44 @@ export const deleteCloudinaryByUrl = async (url) => {
 };
 
 export async function fetchTopProducts() {
-  // 1. Fetch all products (or limit to avoid too many reads)
-  const snapshot = getDocs(collection(db, "products"));
-  
-  // 2. Calculate weighted scores
-  const products = snapshot.docs.map(doc => {
-    const data = doc.data();
-    const likes = data.likes || 0;
-    const textComments = (data.comments?.text || []).length;
-    const videoComments = (data.comments?.video || []).length;
+  // 1. Fetch all products
+  const snapshot = await getDocs(collection(db, "products"));
 
-    const score = (likes * 2) + (textComments * 3) + (videoComments * 6);
+  const products = snapshot.docs.map((doc) => {
+    const data = doc.data();
+
+    const likes = data.likes || 0;
+
+    // Ensure arrays exist
+    const textComments = Array.isArray(data.comments?.text) ? data.comments.text : [];
+    const videoComments = Array.isArray(data.comments?.video) ? data.comments.video : [];
+
+    // Sum ratings for text comments
+    const textRatingsTotal = textComments.reduce((sum, comment) => {
+      return sum + (typeof comment.rating === "number" ? comment.rating : 0);
+    }, 0);
+
+    // Sum ratings for video comments
+    const videoRatingsTotal = videoComments.reduce((sum, comment) => {
+      return sum + (typeof comment.rating === "number" ? comment.rating : 0);
+    }, 0);
+
+    // Calculate weighted score
+    const score =
+      (likes * 2) +
+      (textComments.length * 3) + // base points for text comments
+      (videoComments.length * 6) + // base points for video comments
+      (textRatingsTotal * 2) +     // extra points from text ratings
+      (videoRatingsTotal * 4);     // extra points from video ratings
 
     return { id: doc.id, ...data, score };
   });
 
-  // 3. Sort by score (descending)
+  // Sort by score (descending)
   products.sort((a, b) => b.score - a.score);
 
-  // 4. Return top 3
+  // Return top 3
   return products.slice(0, 3);
 }
+
 

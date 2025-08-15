@@ -6,7 +6,7 @@ import BottomNavigation from "../../components/ui/BottomNavigation";
 import ProductCard from "./components/ProductCard";
 import LoadingCard from "./components/LoadingCard";
 import Icon from "../../components/AppIcon";
-import { getProducts } from "../../functions/Userfunctions"; // Firestore fetch
+import { getProducts,fetchTopProducts } from "../../functions/Userfunctions"; // Firestore fetch
 import { handleSwipe } from "../../functions/Userfunctions";
 
 const DiscoveryFeedSwipeInterface = () => {
