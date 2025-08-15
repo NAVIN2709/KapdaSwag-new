@@ -12,6 +12,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
   const [videoComments, setVideoComments] = useState(comments?.video || []);
   const [textComments, setTextComments] = useState(comments?.text || []);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rating, setRating] = useState(0); // ⭐ Added
 
   const [textInput, setTextInput] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -70,6 +71,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             videoUrl: videoBase64,
             textcomment: textInput.trim() || "",
             userId: currentUser,
+            rating: rating, // ⭐ Added
           }),
         });
         setVideoComments((prev) => [
@@ -79,6 +81,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             videoUrl: videoBase64,
             textcomment: textInput.trim() || "",
             userId: currentUser,
+            rating: rating, // ⭐ Added
           },
         ]);
       } else {
@@ -90,6 +93,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             comment: textInput.trim(),
             ...(imageBase64 && { imageBase64 }),
             userId: currentUser,
+            rating: rating, // ⭐ Added
           }),
         });
         setTextComments((prev) => [
@@ -99,6 +103,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
             comment: textInput.trim(),
             ...(imageBase64 && { imageBase64 }),
             userId: currentUser,
+            rating: rating, // ⭐ Added
           },
         ]);
       }
@@ -178,6 +183,20 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
           onChange={(e) => setTextInput(e.target.value)}
           className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
         />
+        {/* ⭐ Rating Selector */}
+        <div className="flex items-center space-x-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <span
+              key={star}
+              onClick={() => setRating(star)}
+              className={`cursor-pointer text-lg ${
+                star <= rating ? "text-yellow-500" : "text-gray-300"
+              }`}
+            >
+              ★
+            </span>
+          ))}
+        </div>
 
         {/* Send Button */}
         <Button
@@ -256,8 +275,16 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
 
             {/* User Info */}
             <div className="absolute top-4 left-4">
-              <div className="bg-black/40 px-3 py-1 rounded-full text-white text-sm">
-                @{currentVideo.username}
+              <div className="bg-black/40 px-3 py-1 rounded-full text-white text-sm flex flex-col">
+                <span>@{currentVideo.username}</span>
+                {currentVideo.rating > 0 && (
+                  <span className="text-yellow-400 text-lg">
+                    {(() => {
+                      const ratings = currentVideo.rating;
+                      return "⭐".repeat(ratings);
+                    })()}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -303,6 +330,23 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
               className="bg-muted/20 rounded-lg p-3 flex flex-col space-y-2"
             >
               <span className="font-semibold">@{c.username}</span>
+
+              {/* ⭐ Render rating if available */}
+              {c.rating && (
+                <div className="flex space-x-1">
+                  {Array.from({ length: 5 }, (_, idx) => (
+                    <span
+                      key={idx}
+                      className={
+                        idx < c.rating ? "text-yellow-500" : "text-gray-300"
+                      }
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <p className="text-muted-foreground">{c.comment}</p>
               {c.imageBase64 && (
                 <img

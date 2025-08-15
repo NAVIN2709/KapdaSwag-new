@@ -549,3 +549,26 @@ export const deleteCloudinaryByUrl = async (url) => {
   }
 };
 
+export async function fetchTopProducts() {
+  // 1. Fetch all products (or limit to avoid too many reads)
+  const snapshot = getDocs(collection(db, "products"));
+  
+  // 2. Calculate weighted scores
+  const products = snapshot.docs.map(doc => {
+    const data = doc.data();
+    const likes = data.likes || 0;
+    const textComments = (data.comments?.text || []).length;
+    const videoComments = (data.comments?.video || []).length;
+
+    const score = (likes * 2) + (textComments * 3) + (videoComments * 6);
+
+    return { id: doc.id, ...data, score };
+  });
+
+  // 3. Sort by score (descending)
+  products.sort((a, b) => b.score - a.score);
+
+  // 4. Return top 3
+  return products.slice(0, 3);
+}
+
