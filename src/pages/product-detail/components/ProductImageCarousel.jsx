@@ -103,7 +103,7 @@ const ProductImageCarousel = ({ media, productName, onLike, isLiked }) => {
           variant="ghost"
           size="icon"
           onClick={toggleMute}
-          className="absolute bottom-4 right-4 bg-black/40 text-white hover:bg-black/6 z-[100]"
+          className="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-xs z-[100]"
           style={{ width: 44, height: 44 }}
         >
           <Icon name={isMuted ? "VolumeX" : "Volume2"} size={20} />
