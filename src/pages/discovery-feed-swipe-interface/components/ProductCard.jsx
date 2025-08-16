@@ -29,6 +29,9 @@ const ProductCard = ({
   const [CurrentUser, setCurrentUser] = useState(null);
   const [showComments, setShowComments] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState(null); // "left" or "right"
+  const [isMuted, setIsMuted] = useState(true);
+
+  const videoRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -105,6 +108,13 @@ const ProductCard = ({
     setIsSaved((prev) => !prev);
   };
 
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  };
+
   useEffect(() => {
     controls.start({ x: 0, scale: 1 });
   }, []);
@@ -126,8 +136,9 @@ const ProductCard = ({
     >
       {/* Card Content */}
       <div className="relative w-full h-full bg-muted/20 overflow-hidden rounded-2xl">
-        {product?.video? (
+        {product?.video ? (
           <video
+            ref={videoRef}
             src={product.video}
             autoPlay
             muted
@@ -141,6 +152,16 @@ const ProductCard = ({
             alt={product.name}
             className="w-full h-full object-cover"
           />
+        )}
+        {product?.video && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMute}
+            className="absolute bottom-10 right-10 w-12 h-12 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-xs z-[100]"
+          >
+            <Icon name={isMuted ? "VolumeX" : "Volume2"} size={20} />
+          </Button>
         )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />

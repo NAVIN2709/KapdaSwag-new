@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -10,9 +10,19 @@ import Icon from "../../../components/AppIcon";
 import Button from "../../../components/ui/Button";
 
 const ProductImageCarousel = ({ media, productName, onLike, isLiked }) => {
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRefs = useRef([]);
+
   const isVideo = (url) => {
     if (!url) return false; // handles null, undefined, empty string
     return /\.(mp4|webm|ogg)(\?.*)?(#.*)?$/i.test(url);
+  };
+
+  const toggleMute = () => {
+    setIsMuted((prev) => !prev);
+    videoRefs.current.forEach((video) => {
+      if (video) video.muted = !video.muted;
+    });
   };
 
   return (
@@ -26,17 +36,18 @@ const ProductImageCarousel = ({ media, productName, onLike, isLiked }) => {
         pagination={{ clickable: true }}
         className="w-full h-full"
       >
-        {media?.map((item, index) =>
-          item ? (
+        {media
+          ?.filter((item) => item)
+          .map((item, index) => (
             <SwiperSlide key={index}>
               {isVideo(item) ? (
                 <video
+                  ref={(el) => (videoRefs.current[index] = el)}
                   src={item}
                   autoPlay
-                  muted
+                  muted={isMuted}
                   loop
                   playsInline
-                  controls
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -47,8 +58,7 @@ const ProductImageCarousel = ({ media, productName, onLike, isLiked }) => {
                 />
               )}
             </SwiperSlide>
-          ) : null
-        )}
+          ))}
       </Swiper>
 
       {media?.length > 1 && (
@@ -72,6 +82,7 @@ const ProductImageCarousel = ({ media, productName, onLike, isLiked }) => {
         </>
       )}
 
+      {/* Heart / Like Button */}
       <Button
         variant="ghost"
         size="icon"
@@ -85,6 +96,19 @@ const ProductImageCarousel = ({ media, productName, onLike, isLiked }) => {
       >
         <Icon name="Heart" size={20} fill={isLiked ? "currentColor" : "none"} />
       </Button>
+
+      {/* Mute / Unmute Button (only if videos exist) */}
+      {media?.some(isVideo) && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleMute}
+          className="absolute bottom-4 right-4 bg-black/40 text-white hover:bg-black/6 z-[100]"
+          style={{ width: 44, height: 44 }}
+        >
+          <Icon name={isMuted ? "VolumeX" : "Volume2"} size={20} />
+        </Button>
+      )}
     </div>
   );
 };
