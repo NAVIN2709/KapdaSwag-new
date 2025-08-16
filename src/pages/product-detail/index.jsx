@@ -104,9 +104,8 @@ const ProductDetail = () => {
                 {product?.image && (
                   <ProductImageCarousel
                     media={[
-                      product.image,
+                      product.image,product.video,
                       ...(product.extraImages || []),
-                      ...(product.videos || []),
                     ]}
                     productName={product.name}
                     onLike={handleLike}
@@ -143,9 +142,8 @@ const ProductDetail = () => {
         <div className="lg:hidden">
           <ProductImageCarousel
             media={[
-              product.image,
+              product.image,product.video,
               ...(product.extraImages || []),
-              ...(product.videos || []),
             ]}
             productName={product.name}
             onLike={handleLike}

@@ -126,9 +126,9 @@ const ProductCard = ({
     >
       {/* Card Content */}
       <div className="relative w-full h-full bg-muted/20 overflow-hidden rounded-2xl">
-        {product?.videos?.[0] ? (
+        {product?.video? (
           <video
-            src={product.videos[0]}
+            src={product.video}
             autoPlay
             muted
             loop

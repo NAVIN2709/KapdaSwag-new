@@ -10,7 +10,10 @@ import Icon from "../../../components/AppIcon";
 import Button from "../../../components/ui/Button";
 
 const ProductImageCarousel = ({ media, productName, onLike, isLiked }) => {
-  const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
+  const isVideo = (url) => {
+    if (!url) return false; // handles null, undefined, empty string
+    return /\.(mp4|webm|ogg)(\?.*)?(#.*)?$/i.test(url);
+  };
 
   return (
     <div className="relative w-full aspect-square bg-muted/20 overflow-hidden">
@@ -23,27 +26,29 @@ const ProductImageCarousel = ({ media, productName, onLike, isLiked }) => {
         pagination={{ clickable: true }}
         className="w-full h-full"
       >
-        {media?.map((item, index) => (
-          <SwiperSlide key={index}>
-            {isVideo(item) ? (
-              <video
-                src={item}
-                autoPlay
-                muted
-                loop
-                playsInline
-                controls
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <Image
-                src={item}
-                alt={`${productName} - ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            )}
-          </SwiperSlide>
-        ))}
+        {media?.map((item, index) =>
+          item ? (
+            <SwiperSlide key={index}>
+              {isVideo(item) ? (
+                <video
+                  src={item}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  controls
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={item}
+                  alt={`${productName} - ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </SwiperSlide>
+          ) : null
+        )}
       </Swiper>
 
       {media?.length > 1 && (
@@ -78,11 +83,7 @@ const ProductImageCarousel = ({ media, productName, onLike, isLiked }) => {
         }`}
         style={{ width: 44, height: 44 }}
       >
-        <Icon
-          name="Heart"
-          size={20}
-          fill={isLiked ? "currentColor" : "none"}
-        />
+        <Icon name="Heart" size={20} fill={isLiked ? "currentColor" : "none"} />
       </Button>
     </div>
   );

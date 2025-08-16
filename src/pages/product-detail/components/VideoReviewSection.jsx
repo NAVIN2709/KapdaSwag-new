@@ -332,7 +332,7 @@ const VideoReviewSection = ({ comments, currentUser, productId }) => {
               <span className="font-semibold">@{c.username}</span>
 
               {/* ⭐ Render rating if available */}
-              {c.rating && (
+              {c.rating != null && (
                 <div className="flex space-x-1">
                   {Array.from({ length: 5 }, (_, idx) => (
                     <span
