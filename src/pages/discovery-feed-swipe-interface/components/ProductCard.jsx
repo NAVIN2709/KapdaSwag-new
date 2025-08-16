@@ -158,7 +158,7 @@ const ProductCard = ({
             variant="ghost"
             size="icon"
             onClick={toggleMute}
-            className="absolute bottom-10 right-10 w-12 h-12 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-xs z-[100]"
+            className="absolute bottom-10 right-10 w-12 h-12 rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-xs z-[10]"
           >
             <Icon name={isMuted ? "VolumeX" : "Volume2"} size={20} />
           </Button>
