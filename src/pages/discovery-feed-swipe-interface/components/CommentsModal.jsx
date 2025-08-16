@@ -123,7 +123,9 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
 
   // Render ★ emojis
   const renderStars = (count) => {
-    return "★".repeat(count) + "☆".repeat(5 - count);
+    return (
+      "★".repeat(Number(count) || 0) + "☆".repeat(5 - (Number(count) || 0))
+    );
   };
 
   return (
@@ -155,7 +157,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
               </p>
 
               {/* ⭐ Rating */}
-              {commentObj.rating && (
+              {commentObj.rating != null && (
                 <div className="mb-1 text-yellow-400">
                   {renderStars(commentObj.rating)}
                 </div>
@@ -182,7 +184,7 @@ const CommentsModal = ({ productId, comments, onClose, currentUser }) => {
               <p className="text-xs text-white/60 mb-1">@{videoObj.username}</p>
 
               {/* ⭐ Rating */}
-              {videoObj.rating && (
+              {videoObj.rating != null && (
                 <div className="mb-1 text-yellow-400">
                   {renderStars(videoObj.rating)}
                 </div>

@@ -60,7 +60,7 @@ const UserProfile = () => {
     console.log("Content clicked:", content);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSpinner(false), 3000);
+    const timer = setTimeout(() => setShowSpinner(false), 1000);
     return () => clearTimeout(timer);
   }, []);
 

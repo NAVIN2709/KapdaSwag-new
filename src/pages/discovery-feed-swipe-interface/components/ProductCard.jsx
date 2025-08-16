@@ -4,6 +4,7 @@ import {
   useMotionValue,
   useTransform,
   useAnimation,
+  AnimatePresence,
 } from "framer-motion";
 import Icon from "../../../components/AppIcon";
 import Image from "../../../components/AppImage";
@@ -297,12 +298,22 @@ const ProductCard = ({
       </div>
 
       {showComments && (
-        <CommentsModal
-          comments={product.comments}
-          onClose={() => setShowComments(false)}
-          currentUser={CurrentUser}
-          productId={product.id}
-        />
+        <AnimatePresence>
+          <motion.div
+            initial={{ y: "100%" }} // start off-screen at bottom
+            animate={{ y: 0 }} // slide up into view
+            exit={{ y: "100%" }} // slide down on close
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-0 rounded-t-2xl shadow-lg z-50"
+          >
+            <CommentsModal
+              comments={product.comments}
+              onClose={() => setShowComments(false)}
+              currentUser={CurrentUser}
+              productId={product.id}
+            />
+          </motion.div>
+        </AnimatePresence>
       )}
     </motion.div>
   );

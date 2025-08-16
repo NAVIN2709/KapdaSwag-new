@@ -87,7 +87,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
       <div className="w-full max-w-2xl h-[90vh] bg-background rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 h-16 border-b border-border bg-card sticky top-0 z-10">
+        <div className="flex items-center justify-between px-6 h-16 border-b border-border bg-card sticky top-3 z-10">
           <Button variant="ghost" size="icon" onClick={onClose}>
             <Icon name="X" size={22} />
           </Button>
