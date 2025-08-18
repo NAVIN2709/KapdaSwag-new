@@ -243,8 +243,8 @@ const CommunityHub = () => {
 
       {/* Create New Event Modal */}
       {isCreateEventOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4">
-          <div className="bg-background rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4 border">
+          <div className="bg-background rounded-2xl shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
             <button
               className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
               onClick={() => setIsCreateEventOpen(false)}
@@ -265,9 +265,14 @@ const CommunityHub = () => {
       {isBrand && (
         <button
           onClick={() => setIsCreateEventOpen(true)}
-          className="fixed bottom-20 right-6 bg-primary text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:bg-primary/90 transition"
+          className="fixed bottom-20 right-6 bg-primary text-white 
+             p-4 h-14 rounded-full shadow-lg 
+             flex items-center gap-1 
+             hover:bg-primary/90 hover:shadow-xl
+             transition-all duration-300 ease-out"
         >
           <Icon name="Plus" size={20} />
+          <span className="text-[16px]">Create</span>
         </button>
       )}
     </div>

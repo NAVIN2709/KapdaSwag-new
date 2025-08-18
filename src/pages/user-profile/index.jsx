@@ -124,9 +124,27 @@ const UserProfile = () => {
       {user?.isBrand && (
         <button
           onClick={() => setShowNewPostModal(true)}
-          className="fixed bottom-24 right-6 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-lg hover:bg-primary/90 transition text-2xl"
+          className="fixed bottom-24 right-6 px-6 h-14 rounded-full 
+             bg-primary text-white font-medium
+             flex items-center gap-2 shadow-lg
+             hover:scale-105 hover:shadow-xl hover:bg-primary/90
+             transition-all duration-300 ease-out"
         >
-          +
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-4 h-4"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          <span className="text-md">Create</span>
         </button>
       )}
 
