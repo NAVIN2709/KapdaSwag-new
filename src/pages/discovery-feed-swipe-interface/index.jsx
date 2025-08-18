@@ -6,7 +6,7 @@ import BottomNavigation from "../../components/ui/BottomNavigation";
 import ProductCard from "./components/ProductCard";
 import LoadingCard from "./components/LoadingCard";
 import Icon from "../../components/AppIcon";
-import { getProducts,fetchTopProducts } from "../../functions/Userfunctions"; // Firestore fetch
+import { getProducts, fetchTopProducts } from "../../functions/Userfunctions"; // Firestore fetch
 import { handleSwipe } from "../../functions/Userfunctions";
 
 const DiscoveryFeedSwipeInterface = () => {
@@ -25,8 +25,16 @@ const DiscoveryFeedSwipeInterface = () => {
 
       try {
         const data = await getProducts();
+
         if (data.length > 0) {
-          setProducts(data);
+          // Sort products by custom score
+          const sorted = data.sort((a, b) => {
+            const scoreA = calculateScore(a);
+            const scoreB = calculateScore(b);
+            return scoreB - scoreA; // highest score first
+          });
+
+          setProducts(sorted);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -46,6 +54,34 @@ const DiscoveryFeedSwipeInterface = () => {
 
     initializeApp();
   }, []);
+
+  const calculateScore = (product) => {
+    let score = 0;
+
+    // Likes → 1 point each
+    score += Number(product.likes) > 0 ? product.likes * 1 : 0;
+
+    // Text comments (rating * 3)
+    if (Array.isArray(product.comments?.text)) {
+      for (const c of product.comments.text) {
+        if (c?.rating) score += c.rating * 3;
+      }
+    }
+
+    // Video comments (rating * 5)
+    if (Array.isArray(product.comments?.videos)) {
+      for (const v of product.comments.videos) {
+        if (v?.rating) score += v.rating * 10;
+      }
+    }
+
+    // Product has a main video → strong boost (+50)
+    if (product.video) {
+      score += 50;
+    }
+
+    return score;
+  };
 
   // Handle window resize for desktop mode
   useEffect(() => {
