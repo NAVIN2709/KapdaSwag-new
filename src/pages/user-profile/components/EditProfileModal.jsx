@@ -51,42 +51,34 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   };
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const file = e.target.files[0];
+  if (!file) return;
 
-    setIsprofilepicloading(true); // show loading spinner
-    setPreview(URL.createObjectURL(file)); // preview immediately
+  setIsprofilepicloading(true);
+  try {
+    // Upload the new file
+    const url = await uploadFileAndGetUrl(file);
 
-    try {
-      // Delete old Cloudinary image if exists
-      if (
-        formData.profilePic &&
-        formData.profilePic.includes("res.cloudinary.com")
-      ) {
-        await deleteCloudinaryByUrl(formData.profilePic);
-      }
-
-      // Upload new file to Cloudinary
-      const uploadedUrl = await uploadFileAndGetUrl(file);
-
-      if (!uploadedUrl) {
-        alert("Image upload failed. Please try again.");
-        setIsprofilepicloading(false);
-        return;
-      }
-
-      // Update form data immediately
-      setFormData((prev) => ({
-        ...prev,
-        profilePic: uploadedUrl,
-      }));
-    } catch (err) {
-      console.error("Error uploading profile pic:", err);
-      alert("Failed to upload image. Try again.");
-    } finally {
-      setIsprofilepicloading(false);
+    if (!url) {
+      alert("❌ Upload failed. Please try again.");
+      return; // stop here, don't update preview or form
     }
-  };
+
+    // Only delete old image after new one uploaded successfully
+    if (formData.profilePic && formData.profilePic.includes("res.cloudinary.com")) {
+      await deleteCloudinaryByUrl(formData.profilePic);
+    }
+
+    // Update preview and form data
+    setPreview(url);
+    setFormData((prev) => ({ ...prev, profilePic: url }));
+  } catch (err) {
+    console.error("Upload error:", err);
+    alert("❌ Failed to upload image. Please try again.");
+  } finally {
+    setIsprofilepicloading(false);
+  }
+};
 
   const toggleBrandAccount = () => {
     const newValue = !formData.isBrand;
