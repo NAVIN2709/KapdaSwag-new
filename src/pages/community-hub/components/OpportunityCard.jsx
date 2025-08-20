@@ -5,12 +5,7 @@ import Image from "../../../components/AppImage";
 import Button from "../../../components/ui/Button";
 import { deleteEvent } from "functions/Userfunctions";
 
-const OpportunityCard = ({
-  opportunity,
-  onApply,
-  userId,
-  onDelete,
-}) => {
+const OpportunityCard = ({ opportunity, onApply, userId, onDelete }) => {
   const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -59,11 +54,19 @@ const OpportunityCard = ({
 
   const handleDelete = async (e) => {
     e.stopPropagation();
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this event? This action cannot be undone."
+    );
+    if (!confirmed) return;
+
     try {
-      await deleteEvent(opportunity.id);
+      await deleteEvent(opportunity.id, opportunity);
       onDelete?.(opportunity.id);
+      alert("Event deleted successfully ✅");
     } catch (error) {
       console.error("Error deleting event:", error);
+      alert("Failed to delete event ❌");
     }
   };
 

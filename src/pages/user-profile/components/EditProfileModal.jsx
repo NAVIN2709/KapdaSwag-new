@@ -1,26 +1,31 @@
 import React, { useState, useRef } from "react";
+import axios from "axios";
 import Icon from "../../../components/AppIcon";
 import Image from "../../../components/AppImage";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
-import { saveUserData } from "functions/Userfunctions";
+import { saveUserData, deleteCloudinaryByUrl } from "functions/Userfunctions";
 import { useAuth } from "../../../context/AuthContext";
 
 const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   const { user: authUser } = useAuth();
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     username: user?.username || "",
     bio: user?.bio || "",
     location: user?.location || "",
     interests: user?.interests || [],
-    profilePic: user?.profilePic || "",
+    profilePic: user?.profilePic || "", // stored Cloudinary URL
     instagram: user?.instagram || "",
     snapchat: user?.snapchat || "",
     isBrand: user?.isBrand || false,
   });
-  const [newTag, setNewTag] = useState("");
+
+  const [preview, setPreview] = useState(user?.profilePic || ""); // 🆕 for preview
+  const [newFile, setNewFile] = useState(null); // 🆕 hold selected file until Save
   const [isLoading, setIsLoading] = useState(false);
+
   const fileInputRef = useRef(null);
 
   const fashionTags = [
@@ -47,21 +52,34 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFormData((prev) => ({ ...prev, profilePic: e.target.result }));
-      };
-      reader.readAsDataURL(file);
+      setNewFile(file); // keep file for uploading later
+      setPreview(URL.createObjectURL(file)); // show local preview
     }
   };
 
   const toggleBrandAccount = () => {
     const newValue = !formData.isBrand;
     const confirmMsg = newValue
-      ? "Are you sure you want to switch to a Brand Account? This will mark your account as a brand."
+      ? "Are you sure you want to switch to a Brand Account?"
       : "Are you sure you want to switch back to a Personal Account?";
     if (window.confirm(confirmMsg)) {
       setFormData((prev) => ({ ...prev, isBrand: newValue }));
+    }
+  };
+
+  const uploadFileAndGetUrl = async (file) => {
+    const data = new FormData();
+    data.append("file", file);
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_CLOUDINARY_URL}/upload-profilepic`,
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      return res.data.url; // Cloudinary URL returned by backend
+    } catch (error) {
+      console.error("Upload failed:", error);
+      throw error;
     }
   };
 
@@ -73,8 +91,25 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
 
     setIsLoading(true);
     try {
-      await saveUserData(authUser.uid, formData);
-      if (onSave) onSave(formData);
+      let profilePicUrl = formData.profilePic;
+
+      // If user picked a new file
+      if (newFile) {
+        // Delete old Cloudinary image if exists
+        if (formData.profilePic && formData.profilePic.includes("res.cloudinary.com")) {
+          await deleteCloudinaryByUrl(formData.profilePic);
+        }
+
+        // Upload new file to Cloudinary
+        profilePicUrl = await uploadFileAndGetUrl(newFile);
+      }
+
+      const updatedData = { ...formData, profilePic: profilePicUrl };
+
+      // Save updated data
+      await saveUserData(authUser.uid, updatedData);
+
+      if (onSave) onSave(updatedData);
       onClose();
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -114,7 +149,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
                 onClick={handleAvatarClick}
               >
                 <Image
-                  src={formData.profilePic}
+                  src={preview} // 🆕 shows existing URL or local preview
                   alt="avatar"
                   className="w-full h-full object-cover"
                 />

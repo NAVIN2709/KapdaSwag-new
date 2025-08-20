@@ -1,9 +1,10 @@
 import React, { useState, useRef } from "react";
 import Button from "../../../components/ui/Button";
 import Icon from "../../../components/AppIcon";
-import { createNewEvent } from "functions/Userfunctions";
+import { createNewEvent, deleteCloudinaryByUrl } from "functions/Userfunctions";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "context/AuthContext";
+import axios from "axios";
 
 const NewEvent = ({ closeModal }) => {
   const { user } = useAuth();
@@ -24,22 +25,83 @@ const NewEvent = ({ closeModal }) => {
   });
 
   const [previewEvent, setPreviewEvent] = useState(null);
+  const [previewLogo, setPreviewLogo] = useState(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingeventImage, setUploadingeventImage] = useState(false);
   const eventRef = useRef();
   const brandLogoRef = useRef();
   const [loading, setLoading] = useState(false);
 
+  const uploadFileAndGetUrl = async (file) => {
+    const data = new FormData();
+    data.append("file", file);
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_CLOUDINARY_URL}/upload-community`,
+        data,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      return res.data.url; // Cloudinary URL returned by backend
+    } catch (error) {
+      console.error("Upload failed:", error);
+      throw error;
+    }
+  };
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleImageSelect = (e) => {
+  const handleEventImageSelect = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewEvent(reader.result);
-        setForm({ ...form, eventImage: reader.result });
-      };
-      reader.readAsDataURL(file);
+      // delete old event image if exists
+      if (form.eventImage) {
+        await deleteCloudinaryByUrl(form.eventImage);
+      }
+      setUploadingeventImage(true);
+      setPreviewEvent(URL.createObjectURL(file));
+      try {
+        const url = await uploadFileAndGetUrl(file);
+        if (url) {
+          setForm({ ...form, eventImage: url });
+        } else {
+          console.error("Upload failed: No URL returned");
+          alert("❌ Upload failed, please try again");
+          setPreviewEvent(null); // reset preview
+        }
+      } catch (err) {
+        alert("❌ Failed to upload event image");
+        setPreviewEvent(null); // reset preview
+      } finally {
+        setUploadingeventImage(false); // 👈 stop loading
+      }
+    }
+  };
+
+  const handleBrandLogoSelect = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // delete old logo if exists
+      if (form.brandLogo) {
+        await deleteCloudinaryByUrl(form.brandLogo);
+      }
+      setUploadingLogo(true);
+      setPreviewLogo(URL.createObjectURL(file));
+      try {
+        const url = await uploadFileAndGetUrl(file);
+        if (url) {
+          setForm({ ...form, brandLogo: url });
+        } else {
+          console.error("Upload failed: No URL returned");
+          alert("❌ Upload failed, please try again");
+          setPreviewLogo(null); // reset preview
+        }
+      } catch (err) {
+        alert("❌ Failed to upload brand logo");
+        setPreviewLogo(null); // reset preview
+      } finally {
+        setUploadingLogo(false); // 👈 stop loading
+      }
     }
   };
 
@@ -73,43 +135,6 @@ const NewEvent = ({ closeModal }) => {
           </p>
         </div>
 
-        {/* Image Upload */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Event Image</label>
-          <div
-            className="w-full h-56 bg-white/10 rounded-2xl border border-white/20 
-                       flex flex-col items-center justify-center cursor-pointer relative group overflow-hidden"
-            onClick={() => eventRef.current.click()}
-          >
-            {previewEvent ? (
-              <>
-                <img
-                  src={previewEvent}
-                  alt="Preview"
-                  className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform"
-                />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                  <Icon name="Camera" size={28} className="text-white" />
-                </div>
-              </>
-            ) : (
-              <>
-                <Icon name="Camera" size={32} className="text-white/80 mb-2" />
-                <p className="text-sm text-white/70">
-                  Tap to upload event image
-                </p>
-              </>
-            )}
-            <input
-              type="file"
-              ref={eventRef}
-              className="hidden"
-              accept="image/*"
-              onChange={handleImageSelect}
-            />
-          </div>
-        </div>
-
         {/* Basic Info */}
         <section>
           <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
@@ -141,6 +166,61 @@ const NewEvent = ({ closeModal }) => {
             </div>
 
             {/* Brand Logo Upload */}
+            {/* Event Image Upload */}
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Event Image
+              </label>
+              <div
+                className="w-full h-56 bg-white/10 rounded-2xl border border-white/20 
+                       flex flex-col items-center justify-center cursor-pointer relative group overflow-hidden"
+                onClick={() => eventRef.current.click()}
+              >
+                {uploadingeventImage ? (
+                  // Show uploading state
+                  <div className="flex flex-col items-center justify-center w-full h-full bg-black/40 rounded-2xl">
+                    <Icon
+                      name="Loader2"
+                      size={32}
+                      className="animate-spin text-white/80 mb-2"
+                    />
+                    <p className="text-sm text-white/70">Uploading...</p>
+                  </div>
+                ) : previewEvent ? (
+                  <>
+                    <img
+                      src={previewEvent}
+                      alt="Preview"
+                      className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                      <Icon name="Camera" size={28} className="text-white" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Icon
+                      name="Camera"
+                      size={32}
+                      className="text-white/80 mb-2"
+                    />
+                    <p className="text-sm text-white/70">
+                      Tap to upload event image
+                    </p>
+                  </>
+                )}
+
+                <input
+                  type="file"
+                  ref={eventRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleEventImageSelect}
+                />
+              </div>
+            </div>
+
+            {/* Brand Logo Upload */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Brand Logo
@@ -150,10 +230,20 @@ const NewEvent = ({ closeModal }) => {
                flex flex-col items-center justify-center cursor-pointer relative group overflow-hidden"
                 onClick={() => brandLogoRef.current.click()}
               >
-                {form.brandLogo ? (
+                {uploadingLogo ? (
+                  // ⏳ Show spinner while uploading
+                  <div className="flex flex-col items-center justify-center w-full h-full">
+                    <Icon
+                      name="Loader2"
+                      size={32}
+                      className="animate-spin text-white/80 mb-2"
+                    />
+                    <p className="text-sm text-white/70">Uploading...</p>
+                  </div>
+                ) : previewLogo || form.brandLogo ? (
                   <>
                     <img
-                      src={form.brandLogo}
+                      src={previewLogo || form.brandLogo}
                       alt="Brand Logo"
                       className="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform"
                     />
@@ -176,16 +266,7 @@ const NewEvent = ({ closeModal }) => {
                   ref={brandLogoRef}
                   className="hidden"
                   accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setForm({ ...form, brandLogo: reader.result });
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
+                  onChange={handleBrandLogoSelect}
                 />
               </div>
             </div>

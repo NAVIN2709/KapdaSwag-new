@@ -487,7 +487,7 @@ export const createNewEvent = async (eventData) => {
 };
 
 //Delete an Event
-export const deleteEvent = async (eventId) => {
+export const deleteEvent = async (eventId, eventData) => {
   try {
     const eventRef = doc(db, "events", eventId);
 
@@ -500,54 +500,48 @@ export const deleteEvent = async (eventId) => {
     );
     await Promise.all(messageDeletions);
 
-    // Step 2: Delete the main event document
-    await deleteDoc(eventRef);
+    // Step 2: Delete images from Cloudinary (if exist)
+    if (eventData?.eventImage) {
+      await deleteCloudinaryByUrl(eventData.eventImage);
+    }
+    if (eventData?.brandLogo) {
+      await deleteCloudinaryByUrl(eventData.brandLogo);
+    }
 
+    // Step 3: Delete the main event document
+    await deleteDoc(eventRef);
   } catch (error) {
-    console.error("Error deleting event with messages:", error);
+    console.error("Error deleting event with messages & images:", error);
   }
 };
 
-// Delete a Cloudinary resource by URL
 export const deleteCloudinaryByUrl = async (url) => {
   try {
     if (!url) throw new Error("No URL provided");
 
-    // Extract public_id from Cloudinary URL
     const getPublicIdFromUrl = (cloudUrl) => {
-      const parts = cloudUrl.split("/upload/");
-      if (parts.length !== 2) return null;
-
-      let publicIdWithVersion = parts[1]; // e.g. v123/folder/file.jpg
-
-      // Remove version prefix like v123456/
-      publicIdWithVersion = publicIdWithVersion.replace(/^v\d+\//, "");
-
-      // Remove file extension
-      const lastDot = publicIdWithVersion.lastIndexOf(".");
-      return lastDot === -1
-        ? publicIdWithVersion
-        : publicIdWithVersion.substring(0, lastDot);
+      const matches = cloudUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.\w+$/);
+      return matches ? matches[1] : null;
     };
 
     const publicId = getPublicIdFromUrl(url);
     if (!publicId) throw new Error("Invalid Cloudinary URL");
 
-    // Call backend to delete
     const response = await fetch(
-      `https://kapdaswag-upload.onrender.com/delete/${encodeURIComponent(publicId)}`,
+      `${import.meta.env.VITE_CLOUDINARY_URL}/delete/${encodeURIComponent(publicId)}`,
       { method: "DELETE" }
     );
 
-    if (!response.ok) throw new Error(`Delete failed: ${response.statusText}`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || `Delete failed`);
 
-    console.log(`Deleted Cloudinary resource: ${publicId}`);
     return true;
   } catch (error) {
     console.error("Error deleting Cloudinary resource:", error);
     return false;
   }
 };
+
 
 export async function fetchTopProducts() {
   // 1. Fetch all products
