@@ -50,11 +50,41 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setNewFile(file); // keep file for uploading later
-      setPreview(URL.createObjectURL(file)); // show local preview
+    if (!file) return;
+
+    setIsprofilepicloading(true); // show loading spinner
+    setPreview(URL.createObjectURL(file)); // preview immediately
+
+    try {
+      // Delete old Cloudinary image if exists
+      if (
+        formData.profilePic &&
+        formData.profilePic.includes("res.cloudinary.com")
+      ) {
+        await deleteCloudinaryByUrl(formData.profilePic);
+      }
+
+      // Upload new file to Cloudinary
+      const uploadedUrl = await uploadFileAndGetUrl(file);
+
+      if (!uploadedUrl) {
+        alert("Image upload failed. Please try again.");
+        setIsprofilepicloading(false);
+        return;
+      }
+
+      // Update form data immediately
+      setFormData((prev) => ({
+        ...prev,
+        profilePic: uploadedUrl,
+      }));
+    } catch (err) {
+      console.error("Error uploading profile pic:", err);
+      alert("Failed to upload image. Try again.");
+    } finally {
+      setIsprofilepicloading(false);
     }
   };
 
@@ -85,47 +115,24 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   };
 
   const handleSave = async () => {
-  if (!authUser?.uid) {
-    console.error("No authenticated user found");
-    return;
-  }
-
-  setIsLoading(true);
-  try {
-    let profilePicUrl = formData.profilePic;
-
-    // If user picked a new file
-    if (newFile) {
-      // Delete old Cloudinary image if exists
-      if (formData.profilePic && formData.profilePic.includes("res.cloudinary.com")) {
-        await deleteCloudinaryByUrl(formData.profilePic);
-      }
-
-      // Upload new file to Cloudinary
-      profilePicUrl = await uploadFileAndGetUrl(newFile);
-
-      // ✅ stop if no URL returned
-      if (!profilePicUrl) {
-        alert("Image upload failed. Please try again.");
-        setIsLoading(false);
-        return;
-      }
+    if (!authUser?.uid) {
+      console.error("No authenticated user found");
+      return;
     }
 
-    const updatedData = { ...formData, profilePic: profilePicUrl };
+    setIsLoading(true);
+    try {
+      await saveUserData(authUser.uid, formData);
 
-    // Save updated data
-    await saveUserData(authUser.uid, updatedData);
-
-    if (onSave) onSave(updatedData);
-    onClose();
-  } catch (error) {
-    console.error("Error saving profile:", error);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+      if (onSave) onSave(formData);
+      onClose();
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      alert("Failed to save profile. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
@@ -154,14 +161,25 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
           <div className="flex flex-col items-center gap-4">
             <div className="relative group">
               <div
-                className="w-28 h-28 rounded-full overflow-hidden bg-muted cursor-pointer"
+                className="w-28 h-28 rounded-full overflow-hidden bg-muted cursor-pointer flex items-center justify-center"
                 onClick={handleAvatarClick}
               >
-                <Image
-                  src={preview} // 🆕 shows existing URL or local preview
-                  alt="avatar"
-                  className="w-full h-full object-cover"
-                />
+                {isprofilepicloading ? (
+                  <div className="w-full h-full flex flex-col items-center justify-center">
+                    <Icon
+                      name="Loader2"
+                      size={20}
+                      className="animate-spin text-white mb-2"
+                    />
+                    <p className="text-sm text-white">Uploading...</p>
+                  </div>
+                ) : (
+                  <Image
+                    src={preview} // shows existing URL or local preview
+                    alt="avatar"
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </div>
               <div
                 onClick={handleAvatarClick}
@@ -177,6 +195,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
                 className="hidden"
               />
             </div>
+
             <Button variant="outline" size="sm" onClick={handleAvatarClick}>
               Change Photo
             </Button>
