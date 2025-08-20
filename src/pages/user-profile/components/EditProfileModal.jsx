@@ -25,6 +25,7 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   const [preview, setPreview] = useState(user?.profilePic || ""); // 🆕 for preview
   const [newFile, setNewFile] = useState(null); // 🆕 hold selected file until Save
   const [isLoading, setIsLoading] = useState(false);
+  const [isprofilepicloading, setIsprofilepicloading] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -84,39 +85,47 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
   };
 
   const handleSave = async () => {
-    if (!authUser?.uid) {
-      console.error("No authenticated user found");
-      return;
-    }
+  if (!authUser?.uid) {
+    console.error("No authenticated user found");
+    return;
+  }
 
-    setIsLoading(true);
-    try {
-      let profilePicUrl = formData.profilePic;
+  setIsLoading(true);
+  try {
+    let profilePicUrl = formData.profilePic;
 
-      // If user picked a new file
-      if (newFile) {
-        // Delete old Cloudinary image if exists
-        if (formData.profilePic && formData.profilePic.includes("res.cloudinary.com")) {
-          await deleteCloudinaryByUrl(formData.profilePic);
-        }
-
-        // Upload new file to Cloudinary
-        profilePicUrl = await uploadFileAndGetUrl(newFile);
+    // If user picked a new file
+    if (newFile) {
+      // Delete old Cloudinary image if exists
+      if (formData.profilePic && formData.profilePic.includes("res.cloudinary.com")) {
+        await deleteCloudinaryByUrl(formData.profilePic);
       }
 
-      const updatedData = { ...formData, profilePic: profilePicUrl };
+      // Upload new file to Cloudinary
+      profilePicUrl = await uploadFileAndGetUrl(newFile);
 
-      // Save updated data
-      await saveUserData(authUser.uid, updatedData);
-
-      if (onSave) onSave(updatedData);
-      onClose();
-    } catch (error) {
-      console.error("Error saving profile:", error);
-    } finally {
-      setIsLoading(false);
+      // ✅ stop if no URL returned
+      if (!profilePicUrl) {
+        alert("Image upload failed. Please try again.");
+        setIsLoading(false);
+        return;
+      }
     }
-  };
+
+    const updatedData = { ...formData, profilePic: profilePicUrl };
+
+    // Save updated data
+    await saveUserData(authUser.uid, updatedData);
+
+    if (onSave) onSave(updatedData);
+    onClose();
+  } catch (error) {
+    console.error("Error saving profile:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
