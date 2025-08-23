@@ -8,7 +8,7 @@ import SavedFitsGrid from "./components/SavedFitsGrid";
 import UserContentGrid from "./components/UserContentGrid";
 import EditProfileModal from "./components/EditProfileModal";
 import { useAuth } from "../../context/AuthContext";
-import { getUserData } from "functions/Userfunctions";
+import { getUserData, getUserProducts } from "functions/Userfunctions";
 import Loadingspinner from "components/ui/Loadingspinner";
 import NewPost from "./components/NewPost";
 
@@ -166,7 +166,7 @@ const UserProfile = () => {
             >
               ✕
             </button>
-            <NewPost onClose={() => setShowNewPostModal(false)} />
+            <NewPost onClose={() => setShowNewPostModal(false)} userdata={user} />
           </div>
         </div>
       )}

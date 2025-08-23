@@ -69,8 +69,8 @@ const ActionButtons = ({ product, onSaveToCloset, onUnSaveFromCloset, onShare, o
   };
 
   const handleBuyNow = () => {
-    if (product.shopUrl) {
-      window.open(product.shopUrl, '_blank');
+    if (product.productlink) {
+      window.open(product.productlink, '_blank');
       if (onBuyNow) onBuyNow(product);
     } else {
       console.warn('No shop URL available for this product.');

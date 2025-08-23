@@ -180,7 +180,7 @@ const UserContentGrid = ({ onContentClick }) => {
             <div
               onClick={() =>
                 isBrand && item.type === "product"
-                  ? navigate("/product-detail", { state: { product: item } })
+                  ? navigate(`/product-detail/${item.id}`, { state: { product: item } })
                   : onContentClick(item)
               }
               className="aspect-square relative overflow-hidden bg-muted/20 cursor-pointer"

@@ -7,13 +7,13 @@ import {
 } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  getFriends,
   getUserData,
   sendFriendRequest,
   removeFriend,
   cancelFriendRequest,
 } from "functions/Userfunctions";
 import { useAuth } from "../../context/AuthContext";
+import BrandProducts from "./BrandProducts";
 
 const ProfileComponent = ({ profile, isOwnProfile = false }) => {
   const { user } = useAuth();
@@ -28,9 +28,8 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
 
       try {
         const userdata = await getUserData(user.uid);
-        const matched = await getFriends(user.uid);
 
-        const isFollowing = matched.includes(id);
+        const isFollowing = userdata.matched?.includes(id);
         const isRequest = userdata.sentRequests?.includes(id);
 
         if (isFollowing) {
@@ -169,6 +168,11 @@ const ProfileComponent = ({ profile, isOwnProfile = false }) => {
           </a>
         )}
       </div>
+      {profile.isBrand && (
+        <div className="mt-10">
+          <BrandProducts uid={id} />
+        </div>
+      )}
     </div>
   );
 };

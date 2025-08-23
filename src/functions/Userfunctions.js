@@ -584,4 +584,21 @@ export async function fetchTopProducts() {
   return products.slice(0, 3);
 }
 
+export const getUserProducts = async (userId) => {
+  try {
+    const productsRef = collection(db, "products");
+    const q = query(productsRef, where("createdBy", "==", userId));
+
+    const querySnapshot = await getDocs(q);
+    const products = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return products;
+  } catch (error) {
+    console.error("Error fetching user products:", error);
+    return [];
+  }
+};
+
 

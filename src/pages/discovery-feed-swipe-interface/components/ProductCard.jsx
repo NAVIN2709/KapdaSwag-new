@@ -118,6 +118,16 @@ const ProductCard = ({
   useEffect(() => {
     controls.start({ x: 0, scale: 1 });
   }, []);
+  
+  useEffect(() => {
+    if (videoRef.current) {
+      if (isActive) {
+        videoRef.current.play().catch(() => {});
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [isActive]);
 
   return (
     <motion.div
@@ -140,11 +150,11 @@ const ProductCard = ({
           <video
             ref={videoRef}
             src={product.video}
-            autoPlay
             muted
             loop
             playsInline
             className="w-full h-full object-cover"
+            autoPlay={false} // disable default autoplay
           />
         ) : (
           <Image

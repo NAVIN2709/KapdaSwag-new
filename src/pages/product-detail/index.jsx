@@ -59,10 +59,8 @@ const ProductDetail = () => {
     }
   };
 
-  const handleShare = (prod) => console.log("Shared product:", prod.id);
-  const handleBuyNow = (purchaseData) => console.log("Buy now:", purchaseData);
-  const handleProductSelect = (selectedProduct) =>
-    console.log("Selected related product:", selectedProduct.id);
+  const handleShare = (prod) => console.log("Shared product");
+  const handleBuyNow = (purchaseData) => console.log("Buy now:");
 
   const sections = [
     { id: "details", label: "Details", icon: "Info" },

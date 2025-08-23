@@ -23,11 +23,17 @@ const uploadFileAndGetUrl = async (file) => {
   }
 };
 
-const NewPost = ({ onClose }) => {
+const NewPost = ({ onClose, userdata }) => {
   const { user } = useAuth();
+  const [uploading, setUploading] = useState({
+    brandLogo: false,
+    image: false,
+    extraImages: false,
+    video: false,
+  });
   const [formData, setFormData] = useState({
-    brand: "",
-    brandLogo: "",
+    brand: userdata?.name || "",
+    brandLogo: userdata?.profilePic || "",
     category: "",
     description: "",
     designer: "",
@@ -44,6 +50,15 @@ const NewPost = ({ onClose }) => {
     origin: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const categories = [
+    { id: "streetwear", name: "Streetwear" },
+    { id: "y2k", name: "Y2K Vibes" },
+    { id: "oversized", name: "Oversized Fits" },
+    { id: "party", name: "Party Fits" },
+    { id: "cozy", name: "Cozy Wear" },
+    { id: "sneakers", name: "Sneakers" },
+    { id: "accessories", name: "Accessories" },
+  ];
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -51,6 +66,7 @@ const NewPost = ({ onClose }) => {
 
   const handleFileUpload = async (file, field, multiple = false) => {
     try {
+      setUploading((prev) => ({ ...prev, [field]: true })); // start loader
       const uploadedUrl = await uploadFileAndGetUrl(file);
       setFormData((prev) => ({
         ...prev,
@@ -58,6 +74,9 @@ const NewPost = ({ onClose }) => {
       }));
     } catch (err) {
       console.error("Upload error:", err);
+      alert("Upload failed, please try again.");
+    } finally {
+      setUploading((prev) => ({ ...prev, [field]: false })); // stop loader
     }
   };
 
@@ -75,19 +94,19 @@ const NewPost = ({ onClose }) => {
         tags: formData.tags.split(",").map((tag) => tag.trim()),
         createdAt: new Date(),
         createdBy: user?.uid || null,
-        brandLogo:formData.brandLogo
+        brandLogo: formData.brandLogo,
       });
 
       alert("Product posted successfully!");
       setFormData({
-        brand: "",
-        brandLogo: "",
+        brand: userdata?.name || "",
+        brandLogo: userdata?.profilePic || "",
         category: "",
         description: "",
         designer: "",
         image: "",
         extraImages: [],
-        videos: [],
+        video: "",
         name: "",
         originalPrice: "",
         price: "",
@@ -141,47 +160,72 @@ const NewPost = ({ onClose }) => {
           />
 
           {/* Brand Logo Upload */}
+          {/* Brand Logo Upload */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium mb-2">
               <Icon name="Image" size={16} /> Brand Logo
             </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                e.target.files[0] &&
-                handleFileUpload(e.target.files[0], "brandLogo")
-              }
-            />
-            {formData.brandLogo && (
-              <img
-                src={formData.brandLogo}
-                alt="Brand Logo Preview"
-                className="mt-2 w-20 h-20 object-cover rounded-full border"
+            {uploading.brandLogo ? (
+              <p className="text-sm text-gray-500">Uploading...</p>
+            ) : formData.brandLogo ? (
+              <div className="flex items-center gap-2">
+                <img
+                  src={formData.brandLogo}
+                  alt="Brand Logo"
+                  className="h-16 w-16 rounded-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, brandLogo: null })}
+                  className="px-2 py-1 text-sm bg-red-500 text-white rounded"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  e.target.files[0] &&
+                  handleFileUpload(e.target.files[0], "brandLogo")
+                }
               />
             )}
           </div>
 
-          <Input
-            label="Category"
+          <label className="block text-sm font-medium mb-1">Category</label>
+          <select
             value={formData.category}
             onChange={(e) => handleChange("category", e.target.value)}
             required
-          />
+            className="w-full rounded-lg border p-2 bg-transparent"
+          >
+            <option value="">Select Category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
 
           {/* Main Product Image */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium mb-2">
               <Icon name="Image" size={16} /> Main Product Image
             </label>
+            {uploading.image && (
+              <p className="text-sm text-gray-500">Uploading...</p>
+            )}
             <input
               type="file"
               accept="image/*"
               onChange={(e) =>
-                e.target.files[0] && handleFileUpload(e.target.files[0], "image")
+                e.target.files[0] &&
+                handleFileUpload(e.target.files[0], "image")
               }
             />
-            {formData.image && (
+            {formData.image && !uploading.image && (
               <img
                 src={formData.image}
                 alt="Preview"
@@ -195,6 +239,9 @@ const NewPost = ({ onClose }) => {
             <label className="flex items-center gap-2 text-sm font-medium mb-2">
               <Icon name="ImagePlus" size={16} /> Extra Images
             </label>
+            {uploading.extraImages && (
+              <p className="text-sm text-gray-500">Uploading...</p>
+            )}
             <input
               type="file"
               accept="image/*"
@@ -217,33 +264,30 @@ const NewPost = ({ onClose }) => {
           </div>
 
           {/* Videos */}
+          {/* Video */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium mb-2">
-              <Icon name="Video" size={16} /> Product Videos
+              <Icon name="Video" size={16} /> Product Video
             </label>
+            {uploading.video && (
+              <p className="text-sm text-gray-500">Uploading...</p>
+            )}
             <input
               type="file"
               accept="video/*"
-              multiple
-              onChange={(e) =>
-                Array.from(e.target.files).forEach((file) =>
-                  handleFileUpload(file, "videos", true)
-                )
+              onChange={
+                (e) =>
+                  e.target.files[0] &&
+                  handleFileUpload(e.target.files[0], "video") // single video
               }
             />
-            <div className="flex gap-2 mt-2 flex-wrap">
-              {formData.videos.map((vid, i) => (
-                <video
-                  key={i}
-                  src={vid}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-28 h-28 object-cover rounded-lg"
-                />
-              ))}
-            </div>
+            {formData.video && !uploading.video && (
+              <video
+                src={formData.video}
+                controls
+                className="mt-2 w-40 h-40 object-cover rounded-lg"
+              />
+            )}
           </div>
 
           {/* Description */}
