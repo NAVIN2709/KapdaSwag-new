@@ -4,9 +4,8 @@ import { AnimatePresence } from "framer-motion";
 import Header from "../../components/ui/Header";
 import BottomNavigation from "../../components/ui/BottomNavigation";
 import ProductCard from "./components/ProductCard";
-import LoadingCard from "./components/LoadingCard";
 import Icon from "../../components/AppIcon";
-import { getProducts, fetchTopProducts } from "../../functions/Userfunctions"; // Firestore fetch
+import { getProducts } from "../../functions/Userfunctions"; // Firestore fetch
 import { handleSwipe } from "../../functions/Userfunctions";
 
 const DiscoveryFeedSwipeInterface = () => {
@@ -118,24 +117,6 @@ const DiscoveryFeedSwipeInterface = () => {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [currentIndex, products, isDesktop]);
 
-  // Load more products if near the end
-  useEffect(() => {
-    if (products.length - currentIndex <= 2 && !isLoading) {
-      loadMoreProducts();
-    }
-  }, [currentIndex, products.length, isLoading]);
-
-  const loadMoreProducts = async () => {
-    setIsLoading(true);
-    try {
-      const more = await getProducts();
-      setProducts((prev) => [...prev, ...more]);
-    } catch (error) {
-      console.error("Error loading more products:", error);
-    }
-    setIsLoading(false);
-  };
-
   const handleSwipeLeft = useCallback((product) => {
     setProducts((prev) => prev.filter((p) => p.id !== product.id));
   }, []);
@@ -153,8 +134,31 @@ const DiscoveryFeedSwipeInterface = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="pt-16 pb-20 h-screen relative">
-          <LoadingCard />
+        <div className="pt-16 pb-20 h-screen flex items-center justify-center text-center">
+          <p className="text-gray-400 text-lg">Loading products...</p>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
+
+  // 🟢 Empty state
+  if (!isLoading && products.length === 0) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-16 pb-20 h-screen flex items-center justify-center text-center">
+          <div>
+            <Icon
+              name="Box"
+              size={48}
+              className="mx-auto mb-4 text-gray-400"
+            />
+            <h2 className="text-xl font-semibold">No Products Available</h2>
+            <p className="text-gray-500 mt-2">
+              Check back later for new fashion drops!
+            </p>
+          </div>
         </div>
         <BottomNavigation />
       </div>
@@ -185,7 +189,6 @@ const DiscoveryFeedSwipeInterface = () => {
                 />
               ))}
           </AnimatePresence>
-          {isLoading && <LoadingCard />}
         </div>
 
         {/* Desktop arrows */}

@@ -581,7 +581,7 @@ export async function fetchTopProducts() {
   products.sort((a, b) => b.score - a.score);
 
   // Return top 3
-  return products.slice(0, 3);
+  return products;
 }
 
 export const getUserProducts = async (userId) => {
