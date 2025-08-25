@@ -21,7 +21,6 @@ const CategoryTabs = ({ categories, selectedCategory, onCategoryChange }) => {
                 }
               `}
             >
-              <Icon name={category.icon} size={16} />
               <span className="font-medium text-sm">{category.name}</span>
               <span className="text-xs opacity-75 font-mono">
                 {category.count}

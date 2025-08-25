@@ -51,14 +51,27 @@ const NewPost = ({ onClose, userdata }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const categories = [
-    { id: "streetwear", name: "Streetwear" },
-    { id: "y2k", name: "Y2K Vibes" },
-    { id: "oversized", name: "Oversized Fits" },
-    { id: "party", name: "Party Fits" },
-    { id: "cozy", name: "Cozy Wear" },
-    { id: "sneakers", name: "Sneakers" },
-    { id: "accessories", name: "Accessories" },
-  ];
+  { id: "hoodies", name: "Hoodies", icon: "Shirt" }, // Hoodie (using Shirt icon)
+  { id: "tshirts", name: "T-Shirts", icon: "Shirt" },
+  { id: "shirts", name: "Shirts", icon: "Shirt" },
+  { id: "jeans", name: "Jeans", icon: "Kanban" }, // no jeans icon, using Kanban-like folded
+  { id: "trousers", name: "Trousers", icon: "AlignVerticalJustifyCenter" },
+  { id: "shorts", name: "Shorts", icon: "StretchHorizontal" },
+  { id: "skirts", name: "Skirts", icon: "Scissors" },
+  { id: "jackets", name: "Jackets", icon: "Shirt" },
+  { id: "sweaters", name: "Sweaters", icon: "Snowflake" },
+  { id: "blazers", name: "Blazers", icon: "Briefcase" },
+  { id: "suits", name: "Suits", icon: "User" },
+  { id: "tracksuits", name: "Tracksuits", icon: "Activity" },
+  { id: "polo-shirts", name: "Polo Shirts", icon: "Shirt" },
+  { id: "tank-tops", name: "Tank Tops", icon: "AlignHorizontalDistributeCenter" },
+  { id: "cargo-pants", name: "Cargo Pants", icon: "Package" },
+  { id: "overcoats", name: "Overcoats", icon: "CloudRain" },
+  { id: "cardigans", name: "Cardigans", icon: "Layers" },
+  { id: "kurtas", name: "Kurtas", icon: "IndianRupee" }, 
+  { id: "sarees", name: "Sarees", icon: "Flower2" },
+  { id: "accessories", name: "Accessories", icon: "Flower2" },
+];
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

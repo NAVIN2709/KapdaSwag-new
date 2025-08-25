@@ -30,8 +30,10 @@ const SearchBar = ({ onSearch, placeholder = "Search products..." }) => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault(); // ✅ Prevent default form submission
+    e.stopPropagation(); // ✅ Stop event bubbling
     handleSearch();
+    return false; // ✅ Additional prevention
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -41,6 +43,13 @@ const SearchBar = ({ onSearch, placeholder = "Search products..." }) => {
   const handleClear = () => {
     setQuery('');
     onSearch('');
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
   };
 
   if (!isExpanded) {
@@ -59,7 +68,7 @@ const SearchBar = ({ onSearch, placeholder = "Search products..." }) => {
 
   return (
     <div className="px-4 py-3 border-b border-border">
-      <form onSubmit={handleSubmit} className="relative">
+      <form onSubmit={handleSubmit} className="relative" noValidate>
         <div className="flex items-center space-x-2">
           <div className="relative flex-1">
             <Icon 
@@ -72,6 +81,7 @@ const SearchBar = ({ onSearch, placeholder = "Search products..." }) => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder={placeholder}
               className="w-full pl-10 pr-10 py-3 bg-muted/30 border border-border rounded-xl text-black placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent animation-spring"
             />
@@ -89,6 +99,7 @@ const SearchBar = ({ onSearch, placeholder = "Search products..." }) => {
           </div>
           
           <Button
+            type="button"
             variant="ghost"
             onClick={() => setIsExpanded(false)}
             className="text-muted-foreground hover:text-foreground"

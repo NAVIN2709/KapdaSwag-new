@@ -1,30 +1,25 @@
-import React, { useState } from 'react';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-import { Checkbox } from '../../../components/ui/Checkbox';
+import React, { useState } from "react";
+import Icon from "../../../components/AppIcon";
+import Button from "../../../components/ui/Button";
+import { Checkbox } from "../../../components/ui/Checkbox";
 
-const FilterPanel = ({ 
-  isOpen, 
-  onClose, 
-  filters, 
-  onFiltersChange, 
-  isMobile = false 
+const FilterPanel = ({
+  isOpen,
+  onClose,
+  filters,
+  onFiltersChange,
+  isMobile = false,
 }) => {
   const [localFilters, setLocalFilters] = useState(filters);
 
   const priceRanges = [
-    { id: 'under-25', label: 'Under $25', min: 0, max: 25 },
-    { id: '25-50', label: '$25 - $50', min: 25, max: 50 },
-    { id: '50-100', label: '$50 - $100', min: 50, max: 100 },
-    { id: '100-200', label: '$100 - $200', min: 100, max: 200 },
-    { id: 'over-200', label: 'Over $200', min: 200, max: 999999 }
-  ];
-
-  const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-
-  const styleTags = [
-    'Casual', 'Formal', 'Streetwear', 'Vintage', 'Minimalist',
-    'Boho', 'Preppy', 'Grunge', 'Y2K', 'Cottagecore'
+    { id: "under-500", label: "Under ₹500", min: 0, max: 500 },
+    { id: "500-700", label: "₹500 - ₹700", min: 500, max: 700 },
+    { id: "700-1000", label: "₹700 - ₹1000", min: 700, max: 1000 },
+    { id: "1000-1500", label: "₹1000 - ₹1500", min: 1000, max: 1500 },
+    { id: "1500-2000", label: "₹1500 - ₹2000", min: 1500, max: 2000 },
+    { id: "2000-2500", label: "₹2000 - ₹2500", min: 2000, max: 2500 },
+    { id: "over-2500", label: "Over ₹2500", min: 2500, max: 999999 },
   ];
 
   const handleApplyFilters = () => {
@@ -37,25 +32,25 @@ const FilterPanel = ({
       priceRange: null,
       sizes: [],
       styleTags: [],
-      minRating: 0
+      minRating: 0,
     };
     setLocalFilters(clearedFilters);
     onFiltersChange(clearedFilters);
   };
 
   const updateFilter = (key, value) => {
-    setLocalFilters(prev => ({
+    setLocalFilters((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
   const toggleArrayFilter = (key, value) => {
-    setLocalFilters(prev => ({
+    setLocalFilters((prev) => ({
       ...prev,
       [key]: prev[key].includes(value)
-        ? prev[key].filter(item => item !== value)
-        : [...prev[key], value]
+        ? prev[key].filter((item) => item !== value)
+        : [...prev[key], value],
     }));
   };
 
@@ -66,55 +61,19 @@ const FilterPanel = ({
         <h3 className="font-semibold text-foreground mb-3">Price Range</h3>
         <div className="space-y-2">
           {priceRanges.map((range) => (
-            <label key={range.id} className="flex items-center space-x-2 cursor-pointer">
+            <label
+              key={range.id}
+              className="flex items-center space-x-2 cursor-pointer"
+            >
               <input
                 type="radio"
                 name="priceRange"
                 checked={localFilters.priceRange?.id === range.id}
-                onChange={() => updateFilter('priceRange', range)}
+                onChange={() => updateFilter("priceRange", range)}
                 className="w-4 h-4 text-primary border-border focus:ring-primary"
               />
               <span className="text-sm text-foreground">{range.label}</span>
             </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Sizes */}
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Sizes</h3>
-        <div className="flex flex-wrap gap-2">
-          {sizes.map((size) => (
-            <button
-              key={size}
-              onClick={() => toggleArrayFilter('sizes', size)}
-              className={`px-3 py-1 rounded-lg border text-sm animation-spring ${
-                localFilters.sizes.includes(size)
-                  ? 'border-primary bg-primary/10 text-primary' :'border-border text-muted-foreground hover:border-muted-foreground'
-              }`}
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Style Tags */}
-      <div>
-        <h3 className="font-semibold text-foreground mb-3">Style</h3>
-        <div className="flex flex-wrap gap-2">
-          {styleTags.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => toggleArrayFilter('styleTags', tag)}
-              className={`px-3 py-1 rounded-full text-sm animation-spring ${
-                localFilters.styleTags.includes(tag)
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/30 text-muted-foreground hover:bg-muted/50'
-              }`}
-            >
-              {tag}
-            </button>
           ))}
         </div>
       </div>
@@ -126,13 +85,20 @@ const FilterPanel = ({
           {[1, 2, 3, 4, 5].map((rating) => (
             <button
               key={rating}
-              onClick={() => updateFilter('minRating', rating)}
+              onClick={() => updateFilter("minRating", rating)}
               className={`flex items-center space-x-1 px-2 py-1 rounded-lg animation-spring ${
                 localFilters.minRating >= rating
-                  ? 'text-warning' :'text-muted-foreground hover:text-foreground'
+                  ? "text-warning"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon name="Star" size={16} fill={localFilters.minRating >= rating ? 'currentColor' : 'none'} />
+              <Icon
+                name="Star"
+                size={16}
+                fill={
+                  localFilters.minRating >= rating ? "currentColor" : "none"
+                }
+              />
               <span className="text-sm">{rating}+</span>
             </button>
           ))}
@@ -160,12 +126,12 @@ const FilterPanel = ({
                   <Icon name="X" size={20} />
                 </Button>
               </div>
-              
+
               {/* Content */}
               <div className="p-4 overflow-y-auto max-h-[calc(80vh-120px)]">
                 <FilterContent />
               </div>
-              
+
               {/* Actions */}
               <div className="p-4 border-t border-border bg-background">
                 <div className="flex space-x-3">
@@ -205,9 +171,9 @@ const FilterPanel = ({
           Clear All
         </Button>
       </div>
-      
+
       <FilterContent />
-      
+
       <div className="mt-6 pt-6 border-t border-border">
         <Button
           variant="default"

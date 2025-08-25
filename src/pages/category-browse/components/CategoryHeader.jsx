@@ -4,9 +4,7 @@ import Button from '../../../components/ui/Button';
 
 const CategoryHeader = ({ 
   selectedCategory, 
-  productCount, 
-  viewMode, 
-  onViewModeChange, 
+  productCount,  
   onFilterToggle,
   onSortToggle 
 }) => {
@@ -25,16 +23,7 @@ const CategoryHeader = ({
           </div>
           
           {/* View Controls */}
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onViewModeChange(viewMode === 'grid' ? 'list' : 'grid')}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <Icon name={viewMode === 'grid' ? 'List' : 'Grid3X3'} size={20} />
-            </Button>
-            
+          <div className="flex items-center space-x-2">            
             <Button
               variant="ghost"
               size="icon"

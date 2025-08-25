@@ -32,14 +32,46 @@ const CategoryBrowse = () => {
   });
 
   const categories = [
+  // General Category
   { id: "all", name: "All", icon: "Globe" },
-  { id: "streetwear", name: "Streetwear", icon: "Shirt" },
-  { id: "y2k", name: "Y2K Vibes", icon: "Sparkles" },
-  { id: "oversized", name: "Oversized Fits", icon: "Shirt" },
-  { id: "party", name: "Party Fits", icon: "GlassCheers" },
-  { id: "cozy", name: "Cozy Wear", icon: "Coffee" },
-  { id: "sneakers", name: "Sneakers", icon: "Footprints" },
-  { id: "accessories", name: "Accessories", icon: "Watch" },
+  
+  // Top Selling Categories (Based on Indian E-commerce Data)
+  { id: "tshirts", name: "T-Shirts", icon: "Shirt" },        // #1 bestseller across all platforms
+  { id: "jeans", name: "Jeans", icon: "Kanban" },            // #2 most searched & bought
+  { id: "kurtas", name: "Kurtas", icon: "IndianRupee" },     // #3 ethnic wear leader
+  
+  // High-Volume Essentials
+  { id: "shirts", name: "Shirts", icon: "Shirt" },           // Daily office wear essential
+  { id: "hoodies", name: "Hoodies", icon: "Shirt" },         // Gen Z favorite, huge growth
+  { id: "trousers", name: "Trousers", icon: "AlignVerticalJustifyCenter" },
+  
+  // Traditional Wear (Strong in Tier 2/3 cities)
+  { id: "sarees", name: "Sarees", icon: "Flower2" },
+  { id: "suits", name: "Suits", icon: "User" },              // Ethnic suits/salwar sets
+  
+  // Gen Z Trendy Categories
+  { id: "cargo-pants", name: "Cargo Pants", icon: "Package" }, // Trending with Gen Z
+  { id: "shorts", name: "Shorts", icon: "StretchHorizontal" },
+  { id: "polo-shirts", name: "Polo Shirts", icon: "Shirt" },
+  { id: "tank-tops", name: "Tank Tops", icon: "AlignHorizontalDistributeCenter" },
+  
+  // Athleisure & Comfort (Growing Category)
+  { id: "tracksuits", name: "Tracksuits", icon: "Activity" },
+  
+  // Women's Specific
+  { id: "skirts", name: "Skirts", icon: "Scissors" },
+  
+  // Seasonal Wear
+  { id: "jackets", name: "Jackets", icon: "Shirt" },
+  { id: "sweaters", name: "Sweaters", icon: "Snowflake" },
+  { id: "cardigans", name: "Cardigans", icon: "Layers" },
+  { id: "overcoats", name: "Overcoats", icon: "CloudRain" },
+  
+  // Professional Wear
+  { id: "blazers", name: "Blazers", icon: "Briefcase" },
+  
+  // Additional Items
+  { id: "accessories", name: "Accessories", icon: "Flower2" },
 ];
 
   // 🔹 Fetch products from Firestore/API
@@ -63,17 +95,14 @@ const fetchProducts = useCallback(async () => {
     if (selectedCategory !== "all") {
       filtered = filtered.filter((p) => p.category === selectedCategory);
     }
-    if (searchQuery) {
-      filtered = filtered.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (p.tags &&
-            p.tags.some((tag) =>
-              tag.toLowerCase().includes(searchQuery.toLowerCase())
-            ))
-      );
-    }
+if (searchQuery) {
+  filtered = filtered.filter(
+    (p) =>
+      (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (p.brand && p.brand.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+}
     if (filters.priceRange) {
       filtered = filtered.filter(
         (p) =>

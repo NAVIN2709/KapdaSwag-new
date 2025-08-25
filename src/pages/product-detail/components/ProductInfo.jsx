@@ -82,7 +82,7 @@ const ProductInfo = ({ product }) => {
           Description
         </h3>
         <p className="text-muted-foreground leading-relaxed">
-          {product.description}
+          {product.description || "Not Mentioned"}
         </p>
       </div>
 
@@ -93,19 +93,19 @@ const ProductInfo = ({ product }) => {
           <div className="flex justify-between">
             <span className="text-muted-foreground">Material</span>
             <span className="text-foreground">
-              {product.material || "100% Cotton"}
+              {product.material || "Not Mentioned"}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Care</span>
             <span className="text-foreground">
-              {product.care || "Machine wash cold"}
+              {product.care || "Not Mentioned"}
             </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Origin</span>
             <span className="text-foreground">
-              {product.origin || "Made in India"}
+              {product.origin || "Not Mentioned"}
             </span>
           </div>
         </div>
